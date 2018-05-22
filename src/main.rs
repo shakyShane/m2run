@@ -24,10 +24,10 @@ fn run() {
     match has_docker() {
         Ok(a) => {
             let cwd = current_working_dir();
-            match verify_files(cwd) {
+            match verify_files(&cwd) {
                 Ok(_) => {
                     println!("All files exist");
-                    build::build_dockerfile();
+                    build::build_dockerfile(&cwd);
                 },
                 Err(_) => {
                     println!("error")
@@ -54,10 +54,11 @@ fn current_working_dir() -> PathBuf {
     p
 }
 
-fn verify_files(cwd: PathBuf) -> Result<usize, usize> {
+fn verify_files(cwd: &PathBuf) -> Result<usize, usize> {
     let required_files = vec![
         "composer.json",
         "composer.lock",
+        "auth.json"
 //        "app/etc/config.php",
     ];
     let file_statues = required_files_status(&required_files, &cwd);
