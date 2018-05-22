@@ -27,6 +27,7 @@ fn run() {
             match verify_files(cwd) {
                 Ok(_) => {
                     println!("All files exist");
+                    build::build_dockerfile();
                 },
                 Err(_) => {
                     println!("error")

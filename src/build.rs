@@ -2,10 +2,10 @@ use std::process::Stdio;
 use std::process::Command;
 use std::io::Write;
 
-fn build() {
+pub fn build_dockerfile() {
     let build_text = "FROM bluestreak/entry";
 
-    // Spawn the `wc` command
+    // Spawn the `docker build` command
     let mut process = match Command::new("docker")
         .args(&["build", "-f", "-", "."])
         .stdin(Stdio::piped())
