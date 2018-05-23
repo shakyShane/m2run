@@ -5,15 +5,16 @@ volumes:
 services:
 
   caddy:
-    image: m2run__graham-and-green__caddy
+    container_name: m2run__graham-and-green__caddy
+    image: m2run__graham-and-green__caddy:latest
     links:
       - entry
     ports:
       - '80:80'
       - '443:443'
 
-  nginx:
-    image: m2run__graham-and-green__nginx
+  entry:
+    container_name: m2run__graham-and-green__nginx
     image: bluestreak/entry:3
     volumes_from:
       - php
@@ -42,13 +43,12 @@ services:
       - MYSQL_ROOT_PASSWORD=docker
       - MYSQL_USER=docker
 
-      - MAGE_HOST=https://shop.pwa.m2
+      - MAGE_HOST=https://gg.m2
       - MAGE_ADMIN_USER=admin
       - MAGE_ADMIN_PASS=password123
 
       - PHP_MEMORY_LIMIT=3G
-      - VIRTUAL_HOST=https://shop.pwa.m2
-
+      - VIRTUAL_HOST=https://gg.m2
   db:
     container_name: m2run__graham-and-green__mysql
     image: 'mysql:5.6'
@@ -63,6 +63,7 @@ services:
       - '3306'
 
   redis:
+    container_name: m2rum__graham-and-green__redis
     image: 'redis:3-alpine'
     ports:
       - '6379'

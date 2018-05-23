@@ -9,6 +9,7 @@ use command::execute_command;
 mod build;
 mod command;
 mod files;
+mod run;
 
 #[derive(Debug)]
 enum SubCommands {
@@ -23,9 +24,10 @@ fn main() {
                 SubCommands::Default => {
                     let cm_1 = build::build_dockerfile(&run_context);
                     let cm_2 = build::build_caddy(&run_context);
-
+                    let cm_3 = run::run();
                     execute_command(cm_1.unwrap());
                     execute_command(cm_2.unwrap());
+                    execute_command(cm_3.unwrap());
                 }
             }
         },

@@ -62,6 +62,6 @@ fn has_docker() -> Result<ExitStatus, Error> {
 
 pub fn current_working_dir() -> PathBuf {
     let mut p = PathBuf::new();
-    p.push("/Users/shakyshane/Sites/jh/graham-and-green");
+    p.push("/Users/shakyshane/Downloads/magento2-2.2-develop");
     p
 }
