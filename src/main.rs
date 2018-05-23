@@ -25,8 +25,8 @@ fn run() {
         Ok(a) => {
             let cwd = current_working_dir();
             match verify_files(&cwd) {
-                Ok(_) => {
-                    println!("All files exist");
+                Ok(num) => {
+                    println!("All {} required files exist, continuing...", num);
                     build::build_dockerfile(&cwd);
                 },
                 Err(_) => {
