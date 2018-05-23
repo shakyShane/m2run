@@ -13,39 +13,45 @@ use std::path::PathBuf;
 use std::ffi::OsString;
 use std::ffi::OsStr;
 use std::borrow::Cow;
+use command::RunContext;
 
 mod build;
+mod command;
 
-fn main() {
-    run();
+#[derive(Debug)]
+enum SubCommands {
+    Default,
 }
 
-fn run() {
+fn main() {
+    let cmd_to_run = SubCommands::Default;
+    match get_run_context() {
+        Ok(run_context) => {
+            match cmd_to_run {
+                SubCommands::Default => {
+                    let cm_1 = build::build_dockerfile(&run_context);
+                    println!("{:?}", cm_1);
+                }
+            }
+        },
+        Err(msg) => println!("{}", msg)
+    }
+}
+
+fn get_run_context() -> Result<RunContext, String> {
     match has_docker() {
         Ok(a) => {
             let cwd = current_working_dir();
             match verify_files(&cwd) {
-                Ok(num) => {
-                    println!("All {} required files exist, continuing...", num);
-                    build::build_dockerfile(&cwd);
-                },
-                Err(_) => {
-                    println!("error")
-                }
+                Ok(num) => Ok(RunContext { cwd: cwd }),
+                Err(e) => Err("Could not verify files".to_string())
             }
-//            match std::env::current_dir() {
-//                Ok(cwd) => {
-//                    let mut p = PathBuf::new();
-//                    p.push("/Users/shakyshane/Sites/jh/graham-and-green");
-//
-//                }
-//                Err(e) => {
-//                    println!("{}", "Could not determine cwd");
-//                }
-//            }
         },
-        Err(e) => println!("Docker is required")
+        Err(e) => Err("Docker is required".to_string())
     }
+}
+
+fn run() {
 }
 
 fn current_working_dir() -> PathBuf {
