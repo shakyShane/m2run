@@ -1,0 +1,69 @@
+version: '2'
+volumes:
+  db-data:
+
+services:
+
+  caddy:
+    image: m2run__graham-and-green__caddy
+    links:
+      - entry
+    ports:
+      - '80:80'
+      - '443:443'
+
+  nginx:
+    image: m2run__graham-and-green__nginx
+    image: bluestreak/entry:3
+    volumes_from:
+      - php
+    depends_on:
+      - php
+
+  php:
+    container_name: m2run__graham-and-green__php
+    image: m2run__graham-and-green__php:latest
+    volumes:
+      - ./composer.lock:/var/www/composer.lock
+      - ./composer.json:/var/www/composer.json
+      - ./app/etc/config.php:/var/www/app/etc/config.php
+      - ./app/etc/env.php:/var/www/app/etc/env.php
+      - ./pub/media:/var/www/pub/media
+      - ./app/design:/var/www/app/design
+      - ./app/code:/var/www/app/code
+    ports:
+      - '9000'
+    depends_on:
+      - db
+    environment:
+      - HTTPS=on
+      - MYSQL_DATABASE=docker
+      - MYSQL_PASSWORD=docker
+      - MYSQL_ROOT_PASSWORD=docker
+      - MYSQL_USER=docker
+
+      - MAGE_HOST=https://shop.pwa.m2
+      - MAGE_ADMIN_USER=admin
+      - MAGE_ADMIN_PASS=password123
+
+      - PHP_MEMORY_LIMIT=3G
+      - VIRTUAL_HOST=https://shop.pwa.m2
+
+  db:
+    container_name: m2run__graham-and-green__mysql
+    image: 'mysql:5.6'
+    environment:
+      - MYSQL_DATABASE=docker
+      - MYSQL_PASSWORD=docker
+      - MYSQL_ROOT_PASSWORD=docker
+      - MYSQL_USER=docker
+    volumes:
+      - 'db-data:/var/lib/mysql'
+    ports:
+      - '3306'
+
+  redis:
+    image: 'redis:3-alpine'
+    ports:
+      - '6379'
+
