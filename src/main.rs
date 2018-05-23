@@ -22,13 +22,10 @@ fn main() {
             match cmd_to_run {
                 SubCommands::Default => {
                     let cm_1 = build::build_dockerfile(&run_context);
-//                    let cm_2 = build::build_caddy(&run_context);
+                    let cm_2 = build::build_caddy(&run_context);
 
                     execute_command(cm_1.unwrap());
-//                    let tasks = vec![cm_1];
-//
-//                    for t in tasks {
-//                    }
+                    execute_command(cm_2.unwrap());
                 }
             }
         },

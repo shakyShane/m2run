@@ -31,10 +31,8 @@ fn build_caddy_command(cwd: &PathBuf) -> IncomingCommand {
     println!("caddy_build_tag = {}", caddy_build_tag);
 
     let caddy_build_args = vec![
-        "build",
-        "-f", "-",
+        "build", "-",
         "-t", &caddy_build_tag,
-        "."
     ].iter().map(|x| x.to_string()).collect();
 
     IncomingCommand {
@@ -47,14 +45,13 @@ fn build_caddy_command(cwd: &PathBuf) -> IncomingCommand {
 #[test]
 fn build_caddy_command_test() {
     let cwd = PathBuf::from("/Users/shakyshane/Sites/jh/graham-and-green");
-    let cmd = docker_build_command(&cwd);
+    let cmd = build_caddy_command(&cwd);
 
     assert_eq!(cmd.command, "docker");
     assert_eq!(cmd.args, vec![
         "build",
-        "-f", "-",
-        "-t", "m2run__graham-and-green__php",
-        "."
+        "-",
+        "-t", "m2run__graham-and-green__caddy",
     ]);
 }
 
@@ -78,6 +75,20 @@ fn docker_build_command(cwd: &PathBuf) -> IncomingCommand {
         args: docker_build_args,
         stdin: docker_build_image_text,
     }
+}
+
+#[test]
+fn docker_build_command_test() {
+    let cwd = PathBuf::from("/Users/shakyshane/Sites/jh/graham-and-green");
+    let cmd = docker_build_command(&cwd);
+
+    assert_eq!(cmd.command, "docker");
+    assert_eq!(cmd.args, vec![
+        "build",
+        "-",
+        "-t", "m2run__graham-and-green__php",
+        "."
+    ]);
 }
 
 fn create_build_tag(base_name: &OsStr, suffix: &'static str) -> String {

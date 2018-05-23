@@ -1,3 +1,12 @@
+# Builder
+FROM abiosoft/caddy:builder as builder
+
+ARG version="0.10.10"
+ARG plugins="git"
+
+RUN VERSION=${version} PLUGINS=${plugins} /bin/sh /usr/bin/builder.sh
+
+# Build caddy
 FROM alpine:3.6
 
 LABEL caddy_version="0.10.10"
@@ -16,8 +25,6 @@ VOLUME /root/.caddy
 WORKDIR /srv
 
 RUN echo "shop.pwa.m2:443 { proxy http://entry { transparent }  tls self_signed }" > /etc/Caddyfile
-
-COPY --from=build-deps /usr/src/app/dist /srv
 
 ENTRYPOINT ["/usr/bin/caddy"]
 CMD ["--conf", "/etc/Caddyfile", "--log", "stdout"]
