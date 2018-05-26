@@ -46,19 +46,6 @@ fn build_caddy_command(cwd: &PathBuf) -> IncomingCommand {
     }
 }
 
-#[test]
-fn build_caddy_command_test() {
-    let cwd = PathBuf::from("/Users/shakyshane/Sites/jh/graham-and-green");
-    let cmd = build_caddy_command(&cwd);
-
-    assert_eq!(cmd.command, "docker");
-    assert_eq!(cmd.args, vec![
-        "build",
-        "-",
-        "-t", "m2run__graham-and-green__caddy",
-    ]);
-}
-
 fn docker_build_command(cwd: &PathBuf) -> IncomingCommand {
 
     let cwd_base_name = cwd.file_name().expect("Could not determine base_name of directory");
@@ -86,20 +73,6 @@ fn docker_build_command(cwd: &PathBuf) -> IncomingCommand {
         stdin: docker_build_image_text,
         env: HashMap::new()
     }
-}
-
-#[test]
-fn docker_build_command_test() {
-    let cwd = PathBuf::from("/Users/shakyshane/Sites/jh/graham-and-green");
-    let cmd = docker_build_command(&cwd);
-
-    assert_eq!(cmd.command, "docker");
-    assert_eq!(cmd.args, vec![
-        "build",
-        "-",
-        "-t", "m2run__graham-and-green__php",
-        "."
-    ]);
 }
 
 fn create_build_tag(base_name: &OsStr, suffix: &'static str) -> String {
