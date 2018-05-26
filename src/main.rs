@@ -25,9 +25,9 @@ fn main() {
                     let cm_1 = build::build_dockerfile(&run_context);
                     let cm_2 = build::build_caddy(&run_context);
                     let cm_3 = run::run();
-                    execute_command(cm_1.unwrap());
-                    execute_command(cm_2.unwrap());
-                    execute_command(cm_3.unwrap());
+                    execute_command(cm_1.unwrap())
+                        .and_then(|r| execute_command(cm_2.unwrap()))
+                        .and_then(|r| execute_command(cm_3.unwrap()));
                 }
             }
         },

@@ -27,11 +27,13 @@ fn build_caddy_command(cwd: &PathBuf) -> IncomingCommand {
     let cwd_base_name = cwd.file_name().expect("Could not determine base_name of directory");
 
     let caddy_build_image_text = include_str!("templates/caddy.Dockerfile");
+    let caddy_build_file_text = include_str!("templates/Caddyfile");
     let caddy_build_tag: String = create_build_tag(&cwd_base_name, CADDY_TAG_SUFFIX);
     println!("caddy_build_tag = {}", caddy_build_tag);
 
     let caddy_build_args = vec![
         "build", "-",
+        "--build-arg", &*format!("caddyfile={}", caddy_build_file_text),
         "-t", &caddy_build_tag,
     ].iter().map(|x| x.to_string()).collect();
 
@@ -60,6 +62,9 @@ fn docker_build_command(cwd: &PathBuf) -> IncomingCommand {
     let cwd_base_name = cwd.file_name().expect("Could not determine base_name of directory");
 
     let docker_build_image_text = include_str!("templates/Dockerfile");
+    let docker_build_xdebug_text = include_str!("templates/php/xdebug.template");
+    let docker_build_custom_text = include_str!("templates/php/custom.template");
+    let docker_build_install_text = include_str!("templates/php/install");
     let docker_build_tag: String = create_build_tag(&cwd_base_name, PHP_TAG_SUFFIX);
     println!("docker_build_tag = {}", docker_build_tag);
 
@@ -67,6 +72,9 @@ fn docker_build_command(cwd: &PathBuf) -> IncomingCommand {
         "build",
         "-f", "-",
         "-t", &docker_build_tag,
+        "--build-arg", &*format!("xdebug={}", docker_build_xdebug_text),
+        "--build-arg", &*format!("custom={}", docker_build_custom_text),
+        "--build-arg", &*format!("install={}", docker_build_install_text),
         "."
     ].iter().map(|x| x.to_string()).collect();
 

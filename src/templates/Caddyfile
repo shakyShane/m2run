@@ -1,0 +1,6 @@
+gg.m2:443 {
+    proxy http://entry {
+        transparent
+    }
+    tls self_signed
+}

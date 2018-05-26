@@ -16,7 +16,7 @@ pub struct IncomingCommand {
 pub struct RunContext {
     pub cwd: PathBuf
 }
-pub fn execute_command(cmd: IncomingCommand) -> Result<Output, String> {
+pub fn execute_command(cmd: IncomingCommand) -> Result<Output, Error> {
     let process = Command::new(cmd.command)
         .args(&cmd.args)
         .stdin(Stdio::piped())
@@ -26,12 +26,9 @@ pub fn execute_command(cmd: IncomingCommand) -> Result<Output, String> {
     match process {
         Ok(mut child) => {
             child.stdin.as_mut().unwrap().write_all(cmd.stdin.as_bytes());
-            let output = child.wait_with_output().unwrap();
-            Ok(output)
+            child.wait_with_output()
         },
-        Err(e) => {
-            Err(format!("Error running {} {:?}", cmd.command, cmd.args))
-        }
+        Err(e) => Err(e)
     }
 }
 

@@ -24,12 +24,9 @@ EXPOSE 80 443
 VOLUME /root/.caddy
 WORKDIR /srv
 
-RUN echo "gg.m2:443 { \n\
-    proxy http://entry { \n\
-        transparent \n\
-    }  \n\
-    tls self_signed \n\
-}" > /etc/Caddyfile
+ARG caddyfile
+RUN echo "${caddyfile}" > /etc/Caddyfile
+RUN cat /etc/Caddyfile
 
 ENTRYPOINT ["/usr/bin/caddy"]
 CMD ["--conf", "/etc/Caddyfile", "--log", "stdout"]
