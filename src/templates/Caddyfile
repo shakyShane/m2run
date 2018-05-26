@@ -1,5 +1,10 @@
-gg.m2:443 {
-    proxy http://entry {
+gg.m2:80 gg.m2:443 {
+    # redirect to HTTPS
+    redir 301 {
+        if {scheme} not https
+        / https://{host}{uri}
+    }
+    proxy / http://entry {
         transparent
     }
     tls self_signed

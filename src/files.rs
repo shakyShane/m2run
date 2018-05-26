@@ -11,8 +11,7 @@ pub struct FileLookup {
 pub fn verify_files(cwd: &PathBuf) -> Result<usize, usize> {
     let required_files = vec![
         "composer.json",
-        "composer.lock",
-        "auth.json"
+        "composer.lock"
     ];
     let file_statues = required_files_status(&required_files, &cwd);
     let (found, missing): (Vec<&FileLookup>, Vec<&FileLookup>) = file_statues

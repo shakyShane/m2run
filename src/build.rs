@@ -10,6 +10,7 @@ use command::IncomingCommand;
 use command::RunContext;
 use command::current_working_dir;
 use std::path::Path;
+use std::collections::HashMap;
 
 const TAG_PREFIX: &'static str = "m2run";
 const PHP_TAG_SUFFIX: &'static str = "php";
@@ -41,6 +42,7 @@ fn build_caddy_command(cwd: &PathBuf) -> IncomingCommand {
         command: "docker",
         args: caddy_build_args,
         stdin: caddy_build_image_text,
+        env: HashMap::new()
     }
 }
 
@@ -82,6 +84,7 @@ fn docker_build_command(cwd: &PathBuf) -> IncomingCommand {
         command: "docker",
         args: docker_build_args,
         stdin: docker_build_image_text,
+        env: HashMap::new()
     }
 }
 

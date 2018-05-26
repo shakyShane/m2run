@@ -5,8 +5,8 @@ volumes:
 services:
 
   caddy:
-    container_name: m2run__graham-and-green__caddy
-    image: m2run__graham-and-green__caddy:latest
+    container_name: "m2run__${M2RUN_CONTEXT_NAME}__caddy"
+    image: "m2run__${M2RUN_CONTEXT_NAME}__caddy:latest"
     links:
       - entry
     ports:
@@ -14,7 +14,7 @@ services:
       - '443:443'
 
   entry:
-    container_name: m2run__graham-and-green__nginx
+    container_name: "m2run__${M2RUN_CONTEXT_NAME}__nginx"
     image: bluestreak/entry:3
     volumes_from:
       - php
@@ -22,16 +22,12 @@ services:
       - php
 
   php:
-    container_name: m2run__graham-and-green__php
-    image: m2run__graham-and-green__php:latest
+    container_name: "m2run__${M2RUN_CONTEXT_NAME}__php"
+    image: "m2run__${M2RUN_CONTEXT_NAME}__php:latest"
     volumes:
       - ./composer.lock:/var/www/composer.lock
       - ./composer.json:/var/www/composer.json
-      - ./app/etc/config.php:/var/www/app/etc/config.php
-      - ./app/etc/env.php:/var/www/app/etc/env.php
-      - ./pub/media:/var/www/pub/media
-      - ./app/design:/var/www/app/design
-      - ./app/code:/var/www/app/code
+      - ./app:/var/www/app
     ports:
       - '9000'
     depends_on:
@@ -50,7 +46,7 @@ services:
       - PHP_MEMORY_LIMIT=3G
       - VIRTUAL_HOST=https://gg.m2
   db:
-    container_name: m2run__graham-and-green__mysql
+    container_name: "m2run__${M2RUN_CONTEXT_NAME}__mysql"
     image: 'mysql:5.6'
     environment:
       - MYSQL_DATABASE=docker
@@ -63,7 +59,7 @@ services:
       - '3306'
 
   redis:
-    container_name: m2rum__graham-and-green__redis
+    container_name: "m2rum__${M2RUN_CONTEXT_NAME}__redis"
     image: 'redis:3-alpine'
     ports:
       - '6379'
