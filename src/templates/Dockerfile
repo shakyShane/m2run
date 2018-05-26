@@ -61,7 +61,7 @@ RUN rm -rf html && mkdir pub && mkdir var && mkdir -p app/etc
 
 # Magento
 COPY composer.json composer.lock ./
-COPY .docker/composer-cache .docker/composer-cache
+#COPY .docker/composer-cache .docker/composer-cache
 
 RUN chsh -s /bin/bash www-data \
     && chown -R www-data:www-data ./
@@ -69,7 +69,7 @@ RUN chsh -s /bin/bash www-data \
 RUN su - www-data -c "COMPOSER_CACHE_DIR=.docker/composer-cache composer install --no-interaction --prefer-dist -o"
 
 # Frontend
-COPY fapp app
+COPY app app
 COPY bin bin
 COPY dev dev
 COPY generated generated
@@ -82,11 +82,7 @@ RUN ls /var/www/setup -l
 
 RUN find . -user root | xargs chown www-data:www-data
 
-VOLUME ["/var/www/app"]
-VOLUME ["/var/www/bin"]
-VOLUME ["/var/www/dev"]
-VOLUME ["/var/www/generated"]
-VOLUME ["/var/www/lib"]
+VOLUME ["/var/www/app/etc"]
 VOLUME ["/var/www/pub"]
 VOLUME ["/var/www/setup"]
 VOLUME ["/var/www/var"]

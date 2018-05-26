@@ -23,12 +23,19 @@ fn main() {
         Ok(run_context) => {
             match cmd_to_run {
                 SubCommands::Default => {
-                    let cm_1 = build::build_dockerfile(&run_context);
-                    let cm_2 = build::build_caddy(&run_context);
-                    let cm_3 = run::run(&run_context);
-                    execute_command(cm_1.unwrap())
-                        .and_then(|r| execute_command(cm_2.unwrap()))
-                        .and_then(|r| execute_command(cm_3.unwrap()));
+                    let build_docker = build::build_dockerfile(&run_context);
+                    let build_caddy = build::build_caddy(&run_context);
+                    let run_compose = run::run(&run_context);
+
+                    let tasks = vec![
+                        build_docker,
+                        build_caddy,
+                        run_compose
+                    ];
+
+                    for task in tasks {
+                        execute_command(task.unwrap());
+                    }
                 }
             }
         },

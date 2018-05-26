@@ -27,7 +27,8 @@ services:
     volumes:
       - ./composer.lock:/var/www/composer.lock
       - ./composer.json:/var/www/composer.json
-      - ./app:/var/www/app
+      - ./app/code:/var/www/app/code
+      - ./app/design:/var/www/app/design
     ports:
       - '9000'
     depends_on:
@@ -39,12 +40,12 @@ services:
       - MYSQL_ROOT_PASSWORD=docker
       - MYSQL_USER=docker
 
-      - MAGE_HOST=https://gg.m2
+      - MAGE_HOST=https://contrib.m2
       - MAGE_ADMIN_USER=admin
       - MAGE_ADMIN_PASS=password123
 
       - PHP_MEMORY_LIMIT=3G
-      - VIRTUAL_HOST=https://gg.m2
+      - VIRTUAL_HOST=https://contrib.m2
   db:
     container_name: "m2run__${M2RUN_CONTEXT_NAME}__mysql"
     image: 'mysql:5.6'
@@ -56,7 +57,7 @@ services:
     volumes:
       - 'db-data:/var/lib/mysql'
     ports:
-      - '3306'
+      - '3306:3306'
 
   redis:
     container_name: "m2rum__${M2RUN_CONTEXT_NAME}__redis"

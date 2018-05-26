@@ -1,4 +1,4 @@
-gg.m2:80 gg.m2:443 {
+contrib.m2:80 contrib.m2:443 {
     # redirect to HTTPS
     redir 301 {
         if {scheme} not https
