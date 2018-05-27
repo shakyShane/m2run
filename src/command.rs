@@ -71,32 +71,37 @@ pub fn get_run_context() -> Result<RunContext, String> {
         .and_then(|(cwd_as_buf, opts)| create_run_context(&cwd_as_buf, &opts))
 }
 
-fn get_options_hash() -> Result<(PathBuf, HashMap<String, String>), String> {
+fn collect_args() -> Result<Vec<String>, String> {
     let raw_opts: Vec<String> = env::args().collect();
     let arg_len = raw_opts.len();
     match arg_len {
         1 => Err("No command provided".to_string()),
-        _ => {
-            let cwd = current_working_dir();
-            let opts = &raw_opts[2..];
-            let mut defaults = HashMap::new();
-            defaults.insert("cwd".to_string(), cwd.to_string_lossy().to_string());
-            let parsed_options = create_options_hash(opts.to_vec(), defaults);
-            let cwd_parsed = parsed_options.get("cwd").unwrap();
-            let mut cwd_as_buf = PathBuf::new();
-            cwd_as_buf.push(cwd_parsed);
-
-            if cwd_as_buf.is_dir() {
-                return verify_files(&cwd_as_buf)
-                    .and_then(|x| {
-                        set_working_dir(&cwd_as_buf);
-                        Ok((cwd_as_buf, parsed_options.clone()))
-                    })
-            } else {
-                return Err(format!("Directory does not exist\nInput: {:?}", cwd_as_buf));
-            }
-        }
+        _num => Ok(raw_opts)
     }
+}
+
+fn generate_options_hash(raw_opts: Vec<String>) -> Result<(PathBuf, HashMap<String, String>), String> {
+    let os_cwd = current_working_dir();
+    let mut defaults = HashMap::new();
+    defaults.insert("cwd".to_string(), os_cwd.to_string_lossy().to_string());
+    let parsed_options = create_options_hash(raw_opts[2..].to_vec(), defaults);
+    let cwd_as_buf: PathBuf = parsed_options.get("cwd").unwrap().into();
+
+    is_valid_dir(&cwd_as_buf)
+        .and_then(verify_files)
+        .and_then(set_working_dir)
+        .and_then(|x| Ok((cwd_as_buf, parsed_options.clone())))
+}
+
+fn is_valid_dir(path: &PathBuf) -> Result<&PathBuf, String> {
+    if path.is_dir() {
+        return Ok(path);
+    }
+    return Err(format!("Directory does not exist\nInput: {:?}", path));
+}
+
+fn get_options_hash() -> Result<(PathBuf, HashMap<String, String>), String> {
+    collect_args().and_then(generate_options_hash)
 }
 
 fn set_working_dir(path_buf: &PathBuf) -> Result<(), String> {

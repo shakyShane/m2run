@@ -7,6 +7,7 @@ use command::get_run_context;
 use command::execute_command;
 use command::IncomingCommand;
 use std::env;
+use command::RunContext;
 
 mod build;
 mod command;
@@ -16,29 +17,37 @@ mod run;
 fn main() {
     match get_run_context() {
         Ok(run_context) => {
-            match select_cmd(run_context.command.to_string()) {
-                Some(SubCommands::Contrib) => {
-                    let build_docker = build::build_dockerfile(&run_context);
-                    let build_caddy = build::build_caddy(&run_context);
-                    let run_compose = run::run(&run_context);
-
-                    let tasks = vec![
-                        build_docker,
-                        build_caddy,
-                        run_compose
-                    ];
-
-                    for task in tasks {
-//                        execute_command(task.unwrap());
-                    }
-                },
-                None => println!("Please run one of the supported commands")
+            match try_to_execute(run_context) {
+                Ok(x) => {},
+                Err(msg) => println!("Could not run. \nReason: {}", msg),
             }
         },
         Err(msg) => println!("Could not create the Run Context. \nReason: {}", msg)
     }
 }
 
+fn try_to_execute(run_context: RunContext) -> Result<(), String> {
+    match select_cmd(run_context.command.to_string()) {
+        Some(SubCommands::Contrib) => {
+            let build_docker = build::build_dockerfile(&run_context);
+            let build_caddy = build::build_caddy(&run_context);
+            let run_compose = run::run(&run_context);
+
+            let tasks = vec![
+                build_docker,
+                build_caddy,
+                run_compose
+            ];
+
+            for task in tasks {
+//                        execute_command(task.unwrap());
+            }
+
+            Ok(())
+        },
+        None => Err("Please run one of the supported commands".to_string())
+    }
+}
 
 #[derive(Debug, PartialEq)]
 enum SubCommands {
