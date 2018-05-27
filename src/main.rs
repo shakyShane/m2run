@@ -35,7 +35,7 @@ fn main() {
                 None => println!("Please run one of the supported commands")
             }
         },
-        Err(msg) => println!("{}", msg)
+        Err(msg) => println!("Could not create the Run Context. \nReason: {}", msg)
     }
 }
 

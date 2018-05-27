@@ -9,6 +9,7 @@ use files::verify_files;
 use std::collections::HashMap;
 use std::io::ErrorKind;
 use std::env;
+use std::path::Path;
 
 #[derive(Debug)]
 pub struct IncomingCommand {
@@ -55,29 +56,44 @@ pub fn execute_command(cmd: IncomingCommand) -> Result<ExitStatus, Error> {
 pub fn get_run_context() -> Result<RunContext, String> {
     match has_docker() {
         Ok(a) => {
-            let cwd = current_working_dir();
-            match verify_files(&cwd) {
-                Ok(num) => {
-                    match set_current_dir(&cwd) {
-                        Ok(_) => {
-                            let context_name = cwd.file_name().unwrap();
-                            let as_string = context_name.to_string_lossy();
-                            let cmd = env::args().nth(1).or(Some("contrib".to_string())).unwrap();
-                            let raw_opts: Vec<String> = env::args().collect();
-                            let opts = &raw_opts[2..];
-                            let mut defaults = HashMap::new();
-                            let parsed_options = create_options_hash(opts.to_vec(), defaults);
-                            Ok(RunContext {
-                                cwd: cwd.to_path_buf(),
-                                name: as_string.to_string(),
-                                command: cmd,
-                                opts: parsed_options,
-                            })
+            let raw_opts: Vec<String> = env::args().collect();
+            let arg_len = raw_opts.len();
+            match arg_len {
+                1 => Err("No command provided".to_string()),
+                _ => {
+                    let cwd = current_working_dir();
+                    let opts = &raw_opts[2..];
+                    let mut defaults = HashMap::new();
+                    defaults.insert("cwd".to_string(), cwd.to_string_lossy().to_string());
+                    let parsed_options = create_options_hash(opts.to_vec(), defaults);
+                    let cwd_parsed = parsed_options.get("cwd").unwrap();
+                    let mut cwd_as_buf = PathBuf::new();
+                    cwd_as_buf.push(cwd_parsed);
+
+                    if cwd_as_buf.is_dir() {
+                        return match verify_files(&cwd_as_buf) {
+                            Ok(num) => {
+                                match set_current_dir(&cwd_as_buf) {
+                                    Ok(_) => {
+                                        let context_name = cwd_as_buf.file_name().unwrap();
+                                        let as_string = context_name.to_string_lossy();
+                                        let cmd = env::args().nth(1).or(Some("contrib".to_string())).unwrap();
+                                        Ok(RunContext {
+                                            cwd: cwd_as_buf.to_path_buf(),
+                                            name: as_string.to_string(),
+                                            command: cmd,
+                                            opts: parsed_options.clone(),
+                                        })
+                                    },
+                                    Err(e) => Err("Could not set the current working dir".to_string())
+                                }
+                            },
+                            Err(e) => Err("Could not verify files".to_string())
                         }
-                        Err(e) => Err("Could not set the current working dir".to_string())
+                    } else {
+                        return Err(format!("Directory does not exist\nInput: {:?}", cwd_as_buf));
                     }
                 }
-                Err(e) => Err("Could not verify files".to_string())
             }
         }
         Err(e) => Err("Docker is required".to_string())
@@ -101,17 +117,15 @@ fn create_options_hash(opts: Vec<String>, defaults: HashMap<String, String>) -> 
     for (key, val) in defaults.iter() {
 
         let flag = format!("--{}", key);
-        let flag_equal = format!("--{}=", key);
-
         let indexes = 0..opts.len();
         let iter = indexes.zip(opts.iter());
 
         let matches: Vec<(usize, &String)> = iter
-            .filter(|(index, opt)| flag == *opt.as_str())
+            .filter(|&(index, opt)| flag == *opt.as_str())
             .collect();
 
         match matches.get(0) {
-            Some((index, opt)) => {
+            Some(&(index, opt)) => {
                 if let Some(next) = opts.get(index + 1) {
                     map.insert(key.to_string(), next.to_string());
                 }

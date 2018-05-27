@@ -30,7 +30,7 @@ fn build_caddy_command(cwd: &PathBuf) -> IncomingCommand {
     let caddy_build_image_text = include_str!("templates/caddy.Dockerfile");
     let caddy_build_file_text = include_str!("templates/Caddyfile");
     let caddy_build_tag: String = create_build_tag(&cwd_base_name, CADDY_TAG_SUFFIX);
-    println!("caddy_build_tag = {}", caddy_build_tag);
+//    println!("caddy_build_tag = {}", caddy_build_tag);
 
     let caddy_build_args = vec![
         "build", "-",
@@ -55,7 +55,7 @@ fn docker_build_command(cwd: &PathBuf) -> IncomingCommand {
     let docker_build_custom_text = include_str!("templates/php/custom.template");
     let docker_build_install_text = include_str!("templates/php/install");
     let docker_build_tag: String = create_build_tag(&cwd_base_name, PHP_TAG_SUFFIX);
-    println!("docker_build_tag = {}", docker_build_tag);
+//    println!("docker build, running in = {:?}", cwd);
 
     let docker_build_args = vec![
         "build",
@@ -76,6 +76,6 @@ fn docker_build_command(cwd: &PathBuf) -> IncomingCommand {
 }
 
 fn create_build_tag(base_name: &OsStr, suffix: &'static str) -> String {
-    println!("base_name = {:?}", base_name);
+//    println!("base_name = {:?}", base_name);
     format!("{}__{}__{}", TAG_PREFIX, base_name.to_string_lossy(), suffix)
 }
