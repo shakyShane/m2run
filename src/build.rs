@@ -34,15 +34,16 @@ fn build_caddy_command(cwd: &PathBuf) -> IncomingCommand {
 
     let caddy_build_args = vec![
         "build", "-",
-        "--build-arg", &*format!("caddyfile={}", caddy_build_file_text),
         "-t", &caddy_build_tag,
+        "--build-arg", &*format!("caddyfile={}", caddy_build_file_text),
     ].iter().map(|x| x.to_string()).collect();
 
     IncomingCommand {
         command: "docker",
         args: caddy_build_args,
         stdin: caddy_build_image_text,
-        env: HashMap::new()
+        env: HashMap::new(),
+        desc: "Builds the Caddy image (Web server)"
     }
 }
 
@@ -71,7 +72,8 @@ fn docker_build_command(cwd: &PathBuf) -> IncomingCommand {
         command: "docker",
         args: docker_build_args,
         stdin: docker_build_image_text,
-        env: HashMap::new()
+        env: HashMap::new(),
+        desc: "Builds the PHP image"
     }
 }
 

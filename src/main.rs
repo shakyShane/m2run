@@ -8,6 +8,7 @@ use command::execute_command;
 use command::IncomingCommand;
 use std::env;
 use command::RunContext;
+use command::RunMode;
 
 mod build;
 mod command;
@@ -39,9 +40,31 @@ fn try_to_execute(run_context: RunContext) -> Result<(), String> {
                 run_compose
             ];
 
-            for task in tasks {
-//                        execute_command(task.unwrap());
-            }
+            match run_context.mode {
+                RunMode::DryRun => {
+                    let indexes = 0..tasks.len();
+                    for (index, task) in indexes.zip(tasks) {
+                        let unwrapped = task.unwrap();
+                        println!("-------");
+                        println!("Task: {}, Desc: {}",
+                                 index + 1,
+                                 unwrapped.desc
+                        );
+                        println!("-------");
+                        println!("{}{}",
+                                 unwrapped.command,
+                                 unwrapped.args
+                                     .iter()
+                                     .fold("".into(), |acc: String, item| acc + " " + item)
+                        );
+                    }
+                },
+                RunMode::Execute => {
+                    for task in tasks {
+                        execute_command(task.unwrap());
+                    }
+                }
+            };
 
             Ok(())
         },

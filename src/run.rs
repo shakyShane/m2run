@@ -20,6 +20,7 @@ pub fn run(run_context: &RunContext) -> Result<IncomingCommand, Error> {
         command: "docker-compose",
         args: docker_compose_build_args,
         stdin: docker_compose_text,
-        env: env
+        env: env,
+        desc: "Runs the Application with docker-compose"
     })
 }
