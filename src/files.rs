@@ -8,7 +8,7 @@ pub struct FileLookup {
     pub absolute: PathBuf,
 }
 
-pub fn verify_files(cwd: &PathBuf) -> Result<usize, usize> {
+pub fn verify_files(cwd: &PathBuf) -> Result<usize, String> {
     let required_files = vec![
         "composer.json",
         "composer.lock"
@@ -24,7 +24,7 @@ pub fn verify_files(cwd: &PathBuf) -> Result<usize, usize> {
             println!("Cannot continue since the following {} file(s) are missing:", _num);
             missing.iter().for_each(|x| println!("---> {}", x.path));
             println!("cwd: {:?}", cwd);
-            Err(required_files.len())
+            Err("Could not verify files".to_string())
         }
     }
 }
