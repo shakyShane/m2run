@@ -58,21 +58,21 @@ fn docker_build_command(run_context: &RunContext) -> IncomingCommand {
 
     let cwd_base_name = run_context.cwd.file_name().expect("Could not determine base_name of directory");
 
-    let docker_build_image_text = include_str!("templates/Dockerfile");
-    let docker_build_xdebug_text = include_str!("templates/php/xdebug.template");
-    let docker_build_custom_text = include_str!("templates/php/custom.template");
-    let docker_build_install_text = include_str!("templates/php/install");
+    let docker_build_image_text = include_str!("templates/with-deps.Dockerfile");
+//    let docker_build_xdebug_text = include_str!("templates/php/xdebug.template");
+//    let docker_build_custom_text = include_str!("templates/php/custom.template");
+//    let docker_build_install_text = include_str!("templates/php/install");
     let docker_build_tag: String = create_build_tag(&cwd_base_name, PHP_TAG_SUFFIX);
 //    println!("docker build, running in = {:?}", cwd);
 
     let docker_build_args = vec![
-        "build",
-        "-f", "-",
+        "build", "-",
         "-t", &docker_build_tag,
-        "--build-arg", &*create_build_arg("xdebug", docker_build_xdebug_text, "templates/php/xdebug.template", &run_context.mode),
-        "--build-arg", &*create_build_arg("custom", docker_build_custom_text, "templates/php/custom.template", &run_context.mode),
-        "--build-arg", &*create_build_arg("install", docker_build_install_text, "templates/php/install", &run_context.mode),
-        "."
+//        "--compress",
+//        "--build-arg", &*create_build_arg("xdebug", docker_build_xdebug_text, "templates/php/xdebug.template", &run_context.mode),
+//        "--build-arg", &*create_build_arg("custom", docker_build_custom_text, "templates/php/custom.template", &run_context.mode),
+//        "--build-arg", &*create_build_arg("install", docker_build_install_text, "templates/php/install", &run_context.mode),
+//        "."
     ].iter().map(|x| x.to_string()).collect();
 
     IncomingCommand {
