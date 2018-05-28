@@ -1,0 +1,10 @@
+tasks:
+  lint: '@sh cargo fmt'
+  build: '@sh cargo build'
+  test: '@sh cargo test'
+
+  build-all:
+
+    - lint
+    - build
+    - test
