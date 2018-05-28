@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_must_use)]
 
-use command::{get_run_context, execute_command, RunMode, RunContext};
+use command::{execute_command, get_run_context, RunContext, RunMode};
 
 mod build;
 mod command;
@@ -10,13 +10,11 @@ mod run;
 
 fn main() {
     match get_run_context() {
-        Ok(run_context) => {
-            match try_to_execute(run_context) {
-                Ok(_x) => {},
-                Err(msg) => println!("Could not run. \nReason: {}", msg),
-            }
+        Ok(run_context) => match try_to_execute(run_context) {
+            Ok(_x) => {}
+            Err(msg) => println!("Could not run. \nReason: {}", msg),
         },
-        Err(msg) => println!("Could not create the Run Context. \nReason: {}", msg)
+        Err(msg) => println!("Could not create the Run Context. \nReason: {}", msg),
     }
 }
 
@@ -27,11 +25,7 @@ fn try_to_execute(run_context: RunContext) -> Result<(), String> {
             let build_caddy = build::build_caddy(&run_context);
             let run_compose = run::run(&run_context);
 
-            let tasks = vec![
-                build_docker,
-                build_caddy,
-                run_compose
-            ];
+            let tasks = vec![build_docker, build_caddy, run_compose];
 
             match run_context.mode {
                 RunMode::DryRun => {
@@ -39,18 +33,17 @@ fn try_to_execute(run_context: RunContext) -> Result<(), String> {
                     for (index, task) in indexes.zip(tasks) {
                         let unwrapped = task.unwrap();
                         println!("-------");
-                        println!("Task: {}, Desc: {}",
-                                 index + 1,
-                                 unwrapped.desc
-                        );
-                        println!("{}{}",
-                                 unwrapped.command,
-                                 unwrapped.args
-                                     .iter()
-                                     .fold("".into(), |acc: String, item| acc + " " + item)
+                        println!("Task: {}, Desc: {}", index + 1, unwrapped.desc);
+                        println!(
+                            "{}{}",
+                            unwrapped.command,
+                            unwrapped
+                                .args
+                                .iter()
+                                .fold("".into(), |acc: String, item| acc + " " + item)
                         );
                     }
-                },
+                }
                 RunMode::Execute => {
                     for task in tasks {
                         execute_command(task.unwrap());
@@ -59,8 +52,8 @@ fn try_to_execute(run_context: RunContext) -> Result<(), String> {
             };
 
             Ok(())
-        },
-        None => Err("Please run one of the supported commands".to_string())
+        }
+        None => Err("Please run one of the supported commands".to_string()),
     }
 }
 
@@ -70,10 +63,10 @@ enum SubCommands {
 }
 
 fn select_cmd(maybe_cmd: String) -> Option<SubCommands> {
-     match &*maybe_cmd {
-         "contrib" | "c" => Some(SubCommands::Contrib),
-         _ => None
-     }
+    match &*maybe_cmd {
+        "contrib" | "c" => Some(SubCommands::Contrib),
+        _ => None,
+    }
 }
 
 #[test]
