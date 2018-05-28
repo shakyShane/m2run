@@ -35,10 +35,5 @@ fn create_build_arg(
 
 pub fn create_build_tag(base_name: &String, suffix: &'static str) -> String {
     //    println!("base_name = {:?}", base_name);
-    format!(
-        "{}__{}__{}",
-        TAG_PREFIX,
-        base_name,
-        suffix
-    )
+    format!("{}__{}__{}", TAG_PREFIX, base_name, suffix)
 }

@@ -1,8 +1,8 @@
+use build::PHP_TAG_SUFFIX;
 use build::create_build_tag;
 use command::IncomingCommand;
 use context::RunContext;
 use std::collections::HashMap;
-use build::PHP_TAG_SUFFIX;
 
 pub fn docker_build_php_command(run_context: &RunContext) -> IncomingCommand {
     let docker_build_image_text = include_str!("../templates/contrib/with-deps.Dockerfile");

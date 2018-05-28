@@ -45,7 +45,12 @@ pub fn create_run_context(options: options::Options) -> Result<RunContext, Strin
         cwd: options.cwd.to_path_buf(),
         name: as_string.to_string(),
         command: cmd,
-        cwd_file_name: options.cwd.file_name().unwrap().to_string_lossy().to_string(),
+        cwd_file_name: options
+            .cwd
+            .file_name()
+            .unwrap()
+            .to_string_lossy()
+            .to_string(),
         options: options,
         mode,
     })

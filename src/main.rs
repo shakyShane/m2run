@@ -68,8 +68,7 @@ fn try_to_execute(run_context: RunContext) -> Result<(), String> {
                     println!(
                         "{}{}",
                         task.command,
-                        task
-                            .args
+                        task.args
                             .iter()
                             .fold("".into(), |acc: String, item| acc + " " + item)
                     )

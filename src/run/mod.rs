@@ -1,14 +1,13 @@
+use build::PHP_TAG_SUFFIX;
+use build::create_build_tag;
 use command::IncomingCommand;
 use context::RunContext;
 use std::collections::HashMap;
 use std::io::Error;
-use build::create_build_tag;
-use build::PHP_TAG_SUFFIX;
 
 const DOCKER_COMPOSE_TEXT: &'static str = include_str!("../templates/contrib/docker-compose.yml");
 
 pub fn run(run_context: &RunContext) -> Result<IncomingCommand, Error> {
-
     let docker_compose_build_args = vec!["-f", "-", "up", "-d"]
         .iter()
         .map(|x| x.to_string())

@@ -1,8 +1,8 @@
+use build::CADDY_TAG_SUFFIX;
 use build::{create_build_arg, create_build_tag};
 use command::IncomingCommand;
 use context::RunContext;
 use std::collections::HashMap;
-use build::CADDY_TAG_SUFFIX;
 
 pub fn build_caddy_command(run_context: &RunContext) -> IncomingCommand {
     let caddy_build_image_text = include_str!("../templates/contrib/caddy.Dockerfile");

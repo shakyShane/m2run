@@ -31,7 +31,11 @@ fn generate_options(raw_opts: Vec<String>) -> Result<Options, String> {
     defaults.insert("run_mode".to_string(), "execute".into());
 
     let indexes = 0..raw_opts.len();
-    let terminator: Vec<usize> = indexes.zip(raw_opts.iter()).filter(|(_i, opt)| *opt == "--").map(|(i, _opt)| i).collect();
+    let terminator: Vec<usize> = indexes
+        .zip(raw_opts.iter())
+        .filter(|(_i, opt)| *opt == "--")
+        .map(|(i, _opt)| i)
+        .collect();
 
     let trailing = match terminator.get(0) {
         Some(index) => &raw_opts[(index + 1)..],
@@ -45,7 +49,7 @@ fn generate_options(raw_opts: Vec<String>) -> Result<Options, String> {
         cwd: cwd_as_buf,
         flags: flags.clone(),
         trailing: trailing.to_vec(),
-        raw: raw_opts.to_vec()
+        raw: raw_opts.to_vec(),
     })
 }
 
