@@ -1,11 +1,15 @@
 #![allow(dead_code)]
 #![allow(unused_must_use)]
 
-use command::{execute_command, get_run_context, RunContext, RunMode};
+use command::{execute_command, get_run_context};
+use context::RunContext;
+use context::RunMode;
 
 mod build;
 mod command;
+mod context;
 mod files;
+mod options;
 mod run;
 
 fn main() {

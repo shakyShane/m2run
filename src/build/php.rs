@@ -1,7 +1,7 @@
 use std::collections::HashMap;
-
 use build::create_build_tag;
-use command::{IncomingCommand, RunContext};
+use command::IncomingCommand;
+use context::RunContext;
 
 const PHP_TAG_SUFFIX: &'static str = "php";
 

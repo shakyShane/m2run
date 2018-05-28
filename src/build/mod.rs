@@ -3,7 +3,9 @@ use std::io::Error;
 
 use build::caddy::build_caddy_command;
 use build::php::docker_build_php_command;
-use command::{IncomingCommand, RunContext, RunMode};
+use command::{IncomingCommand};
+use context::RunContext;
+use context::RunMode;
 
 mod caddy;
 mod php;

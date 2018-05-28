@@ -1,5 +1,6 @@
 use build::{create_build_arg, create_build_tag};
-use command::{IncomingCommand, RunContext};
+use command::IncomingCommand;
+use context::RunContext;
 use std::collections::HashMap;
 
 const CADDY_TAG_SUFFIX: &'static str = "caddy";
@@ -13,7 +14,6 @@ pub fn build_caddy_command(run_context: &RunContext) -> IncomingCommand {
     let caddy_build_image_text = include_str!("../templates/contrib/caddy.Dockerfile");
     let caddy_build_file_text = include_str!("../templates/contrib/Caddyfile");
     let caddy_build_tag: String = create_build_tag(&cwd_base_name, CADDY_TAG_SUFFIX);
-    //    println!("caddy_build_tag = {}", caddy_build_tag);
 
     let caddy_build_args = vec![
         "build",

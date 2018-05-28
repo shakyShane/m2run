@@ -1,4 +1,5 @@
-use command::{IncomingCommand, RunContext};
+use command::IncomingCommand;
+use context::RunContext;
 use std::collections::HashMap;
 use std::io::Error;
 
