@@ -8,10 +8,11 @@ pub struct Options {
     pub cwd: PathBuf,
     pub flags: HashMap<String, String>,
     pub trailing: Vec<String>,
+    pub raw: Vec<String>,
 }
 
-pub fn get_options_hash() -> Result<Options, String> {
-    collect_args().and_then(generate_options_hash)
+pub fn get_options() -> Result<Options, String> {
+    collect_args().and_then(generate_options)
 }
 
 fn collect_args() -> Result<Vec<String>, String> {
@@ -23,22 +24,32 @@ fn collect_args() -> Result<Vec<String>, String> {
     }
 }
 
-fn generate_options_hash(raw_opts: Vec<String>) -> Result<Options, String> {
+fn generate_options(raw_opts: Vec<String>) -> Result<Options, String> {
     let os_cwd = current_working_dir();
     let mut defaults = HashMap::new();
     defaults.insert("cwd".to_string(), os_cwd.to_string_lossy().to_string());
     defaults.insert("run_mode".to_string(), "execute".into());
-    let parsed_options = create_options_hash(raw_opts[2..].to_vec(), defaults);
-    let cwd_as_buf: PathBuf = parsed_options.get("cwd").unwrap().into();
+
+    let indexes = 0..raw_opts.len();
+    let terminator: Vec<usize> = indexes.zip(raw_opts.iter()).filter(|(_i, opt)| *opt == "--").map(|(i, _opt)| i).collect();
+
+    let trailing = match terminator.get(0) {
+        Some(index) => &raw_opts[(index + 1)..],
+        None => &raw_opts[2..],
+    };
+
+    let flags = create_flags_hash(raw_opts[2..].to_vec(), defaults);
+    let cwd_as_buf: PathBuf = flags.get("cwd").unwrap().into();
 
     Ok(Options {
         cwd: cwd_as_buf,
-        flags: parsed_options.clone(),
-        trailing: vec![],
+        flags: flags.clone(),
+        trailing: trailing.to_vec(),
+        raw: raw_opts.to_vec()
     })
 }
 
-fn create_options_hash(
+fn create_flags_hash(
     opts: Vec<String>,
     defaults: HashMap<String, String>,
 ) -> HashMap<String, String> {
@@ -80,7 +91,7 @@ fn create_options_hash_test() {
     ].iter()
         .map(|x| x.to_string())
         .collect();
-    let m = create_options_hash(opts, defaults);
+    let m = create_flags_hash(opts, defaults);
     assert_eq!(m.get("cwd"), Some(&"/users/shane".to_string()));
     assert_eq!(m.get("name"), Some(&"kittie".to_string()));
     assert_eq!(m.get("dc"), None);

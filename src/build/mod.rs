@@ -1,4 +1,3 @@
-use std::ffi::OsStr;
 use std::io::Error;
 
 use build::caddy::build_caddy_command;
@@ -11,6 +10,8 @@ mod caddy;
 mod php;
 
 const TAG_PREFIX: &'static str = "m2run";
+pub const PHP_TAG_SUFFIX: &'static str = "php";
+pub const CADDY_TAG_SUFFIX: &'static str = "caddy";
 
 pub fn build_caddy(run_context: &RunContext) -> Result<IncomingCommand, Error> {
     Ok(build_caddy_command(run_context))
@@ -32,12 +33,12 @@ fn create_build_arg(
     }
 }
 
-fn create_build_tag(base_name: &OsStr, suffix: &'static str) -> String {
+pub fn create_build_tag(base_name: &String, suffix: &'static str) -> String {
     //    println!("base_name = {:?}", base_name);
     format!(
         "{}__{}__{}",
         TAG_PREFIX,
-        base_name.to_string_lossy(),
+        base_name,
         suffix
     )
 }

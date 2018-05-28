@@ -4,6 +4,7 @@ use command::execute_command;
 use context::RunContext;
 use context::RunMode;
 use context::get_run_context;
+use run::exec;
 
 mod build;
 mod command;
@@ -58,15 +59,23 @@ fn try_to_execute(run_context: RunContext) -> Result<(), String> {
             Ok(())
         }
         Some(SubCommands::Exec) => {
+            let task = exec(&run_context).unwrap();
+
             match run_context.mode {
                 RunMode::DryRun => {
+                    println!("-------");
+                    println!("Task: 1, Desc: {}", task.desc);
                     println!(
-                        "The following command would of been executed in the PHP container: \n{:?}",
-                        run_context.options
-                    );
+                        "{}{}",
+                        task.command,
+                        task
+                            .args
+                            .iter()
+                            .fold("".into(), |acc: String, item| acc + " " + item)
+                    )
                 }
                 RunMode::Execute => {
-                    println!("TODO implement SubCommands::Exec, {:?}", run_context);
+                    execute_command(task);
                 }
             }
             Ok(())
