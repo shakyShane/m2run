@@ -1,4 +1,4 @@
-# m2run
+# m2run [![Build Status](https://travis-ci.org/shakyShane/m2run.svg?branch=master)](https://travis-ci.org/shakyShane/m2run)
 
 > The zero-config way to contribute to Magento 2.
 
