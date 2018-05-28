@@ -11,7 +11,6 @@ mod caddy;
 mod php;
 
 const TAG_PREFIX: &'static str = "m2run";
-const CADDY_TAG_SUFFIX: &'static str = "caddy";
 
 pub fn build_caddy(run_context: &RunContext) -> Result<IncomingCommand, Error> {
     Ok(build_caddy_command(run_context))

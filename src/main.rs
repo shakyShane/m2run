@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 #![allow(unused_must_use)]
 
 use command::{execute_command, get_run_context};
