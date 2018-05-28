@@ -1,10 +1,5 @@
-use context::RunContext;
-use context::create_run_context;
-use options::get_options_hash;
 use std::collections::HashMap;
-use std::env::current_dir;
 use std::io::{Error, ErrorKind, Write};
-use std::path::PathBuf;
 use std::process::{Command, ExitStatus, Stdio};
 
 #[derive(Debug)]
@@ -44,25 +39,4 @@ pub fn execute_command(cmd: IncomingCommand) -> Result<ExitStatus, Error> {
         }
         Err(e) => Err(e),
     }
-}
-
-pub fn get_run_context() -> Result<RunContext, String> {
-    has_docker()
-        .and_then(|_x| get_options_hash())
-        .and_then(|(cwd_as_buf, opts)| create_run_context(&cwd_as_buf, &opts))
-}
-
-fn has_docker() -> Result<ExitStatus, String> {
-    match Command::new("docker")
-        .stdout(Stdio::null())
-        .arg("-v")
-        .status()
-    {
-        Ok(t) => Ok(t),
-        Err(_e) => Err("Docker is required".to_string()),
-    }
-}
-
-pub fn current_working_dir() -> PathBuf {
-    current_dir().unwrap()
 }

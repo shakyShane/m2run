@@ -1,11 +1,16 @@
-use command::current_working_dir;
-use files::verify_files;
+use context::current_working_dir;
 use std::collections::HashMap;
 use std::env;
-use std::env::set_current_dir;
 use std::path::PathBuf;
 
-pub fn get_options_hash() -> Result<(PathBuf, HashMap<String, String>), String> {
+#[derive(Debug, PartialEq)]
+pub struct Options {
+    pub cwd: PathBuf,
+    pub flags: HashMap<String, String>,
+    pub trailing: Vec<String>,
+}
+
+pub fn get_options_hash() -> Result<Options, String> {
     collect_args().and_then(generate_options_hash)
 }
 
@@ -18,9 +23,7 @@ fn collect_args() -> Result<Vec<String>, String> {
     }
 }
 
-fn generate_options_hash(
-    raw_opts: Vec<String>,
-) -> Result<(PathBuf, HashMap<String, String>), String> {
+fn generate_options_hash(raw_opts: Vec<String>) -> Result<Options, String> {
     let os_cwd = current_working_dir();
     let mut defaults = HashMap::new();
     defaults.insert("cwd".to_string(), os_cwd.to_string_lossy().to_string());
@@ -28,24 +31,11 @@ fn generate_options_hash(
     let parsed_options = create_options_hash(raw_opts[2..].to_vec(), defaults);
     let cwd_as_buf: PathBuf = parsed_options.get("cwd").unwrap().into();
 
-    is_valid_dir(&cwd_as_buf)
-        .and_then(verify_files)
-        .and_then(set_working_dir)
-        .and_then(|_x| Ok((cwd_as_buf, parsed_options.clone())))
-}
-
-fn set_working_dir(path_buf: &PathBuf) -> Result<(), String> {
-    match set_current_dir(&path_buf) {
-        Ok(_p) => Ok(()),
-        Err(_e) => Err("Could not set the current working dir".to_string()),
-    }
-}
-
-fn is_valid_dir(path: &PathBuf) -> Result<&PathBuf, String> {
-    if path.is_dir() {
-        return Ok(path);
-    }
-    return Err(format!("Directory does not exist\nInput: {:?}", path));
+    Ok(Options {
+        cwd: cwd_as_buf,
+        flags: parsed_options.clone(),
+        trailing: vec![],
+    })
 }
 
 fn create_options_hash(

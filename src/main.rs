@@ -1,8 +1,9 @@
 #![allow(unused_must_use)]
 
-use command::{execute_command, get_run_context};
+use command::execute_command;
 use context::RunContext;
 use context::RunMode;
+use context::get_run_context;
 
 mod build;
 mod command;
@@ -56,6 +57,20 @@ fn try_to_execute(run_context: RunContext) -> Result<(), String> {
 
             Ok(())
         }
+        Some(SubCommands::Exec) => {
+            match run_context.mode {
+                RunMode::DryRun => {
+                    println!(
+                        "The following command would of been executed in the PHP container: \n{:?}",
+                        run_context.options
+                    );
+                }
+                RunMode::Execute => {
+                    println!("TODO implement SubCommands::Exec, {:?}", run_context);
+                }
+            }
+            Ok(())
+        }
         None => Err("Please run one of the supported commands".to_string()),
     }
 }
@@ -63,11 +78,13 @@ fn try_to_execute(run_context: RunContext) -> Result<(), String> {
 #[derive(Debug, PartialEq)]
 enum SubCommands {
     Contrib,
+    Exec,
 }
 
 fn select_cmd(maybe_cmd: String) -> Option<SubCommands> {
     match &*maybe_cmd {
         "contrib" | "c" => Some(SubCommands::Contrib),
+        "execute" | "exec" | "e" => Some(SubCommands::Exec),
         _ => None,
     }
 }
