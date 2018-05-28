@@ -17,15 +17,15 @@ const PHP_TAG_SUFFIX: &'static str = "php";
 const CADDY_TAG_SUFFIX: &'static str = "caddy";
 
 pub fn build_caddy(run_context: &RunContext) -> Result<IncomingCommand, Error> {
-    Ok(build_caddy_command(&run_context.cwd))
+    Ok(build_caddy_command(run_context))
 }
 
 pub fn build_dockerfile(run_context: &RunContext) -> Result<IncomingCommand, Error> {
-    Ok(docker_build_command(&run_context.cwd))
+    Ok(docker_build_command(run_context))
 }
 
-fn build_caddy_command(cwd: &PathBuf) -> IncomingCommand {
-    let cwd_base_name = cwd.file_name().expect("Could not determine base_name of directory");
+fn build_caddy_command(run_context: &RunContext) -> IncomingCommand {
+    let cwd_base_name = run_context.cwd.file_name().expect("Could not determine base_name of directory");
 
     let caddy_build_image_text = include_str!("templates/caddy.Dockerfile");
     let caddy_build_file_text = include_str!("templates/Caddyfile");
@@ -35,7 +35,7 @@ fn build_caddy_command(cwd: &PathBuf) -> IncomingCommand {
     let caddy_build_args = vec![
         "build", "-",
         "-t", &caddy_build_tag,
-        "--build-arg", &*format!("caddyfile={}", caddy_build_file_text),
+        "--build-arg", &*create_build_arg("caddyfile", caddy_build_file_text, "file:templates/Caddyfile", &run_context.mode),
     ].iter().map(|x| x.to_string()).collect();
 
     IncomingCommand {
@@ -47,9 +47,16 @@ fn build_caddy_command(cwd: &PathBuf) -> IncomingCommand {
     }
 }
 
-fn docker_build_command(cwd: &PathBuf) -> IncomingCommand {
+fn create_build_arg(name: &'static str, text: &'static str, origin: &'static str, mode: &command::RunMode) -> String {
+    match mode {
+        &command::RunMode::Execute => format!("{}={}", name, text),
+        &command::RunMode::DryRun => format!("{}={}", name, origin)
+    }
+}
 
-    let cwd_base_name = cwd.file_name().expect("Could not determine base_name of directory");
+fn docker_build_command(run_context: &RunContext) -> IncomingCommand {
+
+    let cwd_base_name = run_context.cwd.file_name().expect("Could not determine base_name of directory");
 
     let docker_build_image_text = include_str!("templates/Dockerfile");
     let docker_build_xdebug_text = include_str!("templates/php/xdebug.template");
@@ -62,9 +69,9 @@ fn docker_build_command(cwd: &PathBuf) -> IncomingCommand {
         "build",
         "-f", "-",
         "-t", &docker_build_tag,
-        "--build-arg", &*format!("xdebug={}", docker_build_xdebug_text),
-        "--build-arg", &*format!("custom={}", docker_build_custom_text),
-        "--build-arg", &*format!("install={}", docker_build_install_text),
+        "--build-arg", &*create_build_arg("xdebug", docker_build_xdebug_text, "templates/php/xdebug.template", &run_context.mode),
+        "--build-arg", &*create_build_arg("custom", docker_build_custom_text, "templates/php/custom.template", &run_context.mode),
+        "--build-arg", &*create_build_arg("install", docker_build_install_text, "templates/php/install", &run_context.mode),
         "."
     ].iter().map(|x| x.to_string()).collect();
 

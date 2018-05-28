@@ -50,7 +50,6 @@ fn try_to_execute(run_context: RunContext) -> Result<(), String> {
                                  index + 1,
                                  unwrapped.desc
                         );
-                        println!("-------");
                         println!("{}{}",
                                  unwrapped.command,
                                  unwrapped.args
