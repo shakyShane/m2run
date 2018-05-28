@@ -19,8 +19,6 @@ COPY pub pub
 COPY setup setup
 COPY var var
 
-RUN ls /var/www/setup -l
-
 RUN find . -user root | xargs chown www-data:www-data
 
 VOLUME ["/var/www/app/etc"]

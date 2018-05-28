@@ -14,7 +14,7 @@ pub fn verify_files(cwd: &PathBuf) -> Result<&PathBuf, String> {
         "composer.lock"
     ];
     let file_statues = required_files_status(&required_files, &cwd);
-    let (found, missing): (Vec<&FileLookup>, Vec<&FileLookup>) = file_statues
+    let (_found, missing): (Vec<&FileLookup>, Vec<&FileLookup>) = file_statues
         .iter()
         .partition(|x| x.exists);
 

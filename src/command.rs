@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-use std::process::{Command, Stdio, Output, ExitStatus};
+use std::process::{Command, Stdio, ExitStatus};
 use std::env::set_current_dir;
 use std::env::current_dir;
 use std::io::Error;
@@ -9,7 +9,6 @@ use files::verify_files;
 use std::collections::HashMap;
 use std::io::ErrorKind;
 use std::env;
-use std::path::Path;
 
 #[derive(Debug)]
 pub struct IncomingCommand {
@@ -86,7 +85,7 @@ pub fn execute_command(cmd: IncomingCommand) -> Result<ExitStatus, Error> {
 
 pub fn get_run_context() -> Result<RunContext, String> {
     has_docker()
-        .and_then(|x| get_options_hash())
+        .and_then(|_x| get_options_hash())
         .and_then(|(cwd_as_buf, opts)| create_run_context(&cwd_as_buf, &opts))
 }
 
@@ -110,7 +109,7 @@ fn generate_options_hash(raw_opts: Vec<String>) -> Result<(PathBuf, HashMap<Stri
     is_valid_dir(&cwd_as_buf)
         .and_then(verify_files)
         .and_then(set_working_dir)
-        .and_then(|x| Ok((cwd_as_buf, parsed_options.clone())))
+        .and_then(|_x| Ok((cwd_as_buf, parsed_options.clone())))
 }
 
 fn is_valid_dir(path: &PathBuf) -> Result<&PathBuf, String> {
@@ -126,8 +125,8 @@ fn get_options_hash() -> Result<(PathBuf, HashMap<String, String>), String> {
 
 fn set_working_dir(path_buf: &PathBuf) -> Result<(), String> {
     match set_current_dir(&path_buf) {
-        Ok(p) => Ok(()),
-        Err(e) => Err("Could not set the current working dir".to_string())
+        Ok(_p) => Ok(()),
+        Err(_e) => Err("Could not set the current working dir".to_string())
     }
 }
 
@@ -137,7 +136,7 @@ fn has_docker() -> Result<ExitStatus, String> {
         .arg("-v")
         .status() {
         Ok(t) => Ok(t),
-        Err(e) => Err("Docker is required".to_string())
+        Err(_e) => Err("Docker is required".to_string())
     }
 }
 
@@ -155,11 +154,11 @@ fn create_options_hash(opts: Vec<String>, defaults: HashMap<String, String>) -> 
         let iter = indexes.zip(opts.iter());
 
         let matches: Vec<(usize, &String)> = iter
-            .filter(|&(index, opt)| flag == *opt.as_str())
+            .filter(|&(_, opt)| flag == *opt.as_str())
             .collect();
 
         match matches.get(0) {
-            Some(&(index, opt)) => {
+            Some(&(index, _)) => {
                 if let Some(next) = opts.get(index + 1) {
                     map.insert(key.to_string(), next.to_string());
                 }

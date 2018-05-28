@@ -1,14 +1,7 @@
-#![allow(unused_imports)]
-#![allow(unused_variables)]
 #![allow(dead_code)]
 #![allow(unused_must_use)]
 
-use command::get_run_context;
-use command::execute_command;
-use command::IncomingCommand;
-use std::env;
-use command::RunContext;
-use command::RunMode;
+use command::{get_run_context, execute_command, RunMode, RunContext};
 
 mod build;
 mod command;
@@ -19,7 +12,7 @@ fn main() {
     match get_run_context() {
         Ok(run_context) => {
             match try_to_execute(run_context) {
-                Ok(x) => {},
+                Ok(_x) => {},
                 Err(msg) => println!("Could not run. \nReason: {}", msg),
             }
         },
@@ -30,7 +23,7 @@ fn main() {
 fn try_to_execute(run_context: RunContext) -> Result<(), String> {
     match select_cmd(run_context.command.to_string()) {
         Some(SubCommands::Contrib) => {
-            let build_docker = build::build_dockerfile(&run_context);
+            let build_docker = build::build_php(&run_context);
             let build_caddy = build::build_caddy(&run_context);
             let run_compose = run::run(&run_context);
 
