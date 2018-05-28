@@ -1,4 +1,0 @@
-account default
-host ${MAIL_HOST}
-port ${MAIL_PORT}
-auto_from on

@@ -11,7 +11,7 @@ pub fn docker_build_php_command(run_context: &RunContext) -> IncomingCommand {
         .file_name()
         .expect("Could not determine base_name of directory");
 
-    let docker_build_image_text = include_str!("../templates/with-deps.Dockerfile");
+    let docker_build_image_text = include_str!("../templates/contrib/with-deps.Dockerfile");
     let docker_build_tag: String = create_build_tag(&cwd_base_name, PHP_TAG_SUFFIX);
 
     let docker_build_args = vec![

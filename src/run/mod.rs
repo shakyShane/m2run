@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::io::Error;
 
 pub fn run(run_context: &RunContext) -> Result<IncomingCommand, Error> {
-    let docker_compose_text = include_str!("../templates/docker-compose.yml");
+    let docker_compose_text = include_str!("../templates/contrib/docker-compose.yml");
 
     let docker_compose_build_args = vec!["-f", "-", "up", "-d"]
         .iter()
@@ -21,7 +21,7 @@ pub fn run(run_context: &RunContext) -> Result<IncomingCommand, Error> {
         command: "docker-compose",
         args: docker_compose_build_args,
         stdin: docker_compose_text,
-        env: env,
+        env,
         desc: "Runs the Application with docker-compose",
     })
 }

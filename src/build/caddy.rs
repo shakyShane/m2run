@@ -10,8 +10,8 @@ pub fn build_caddy_command(run_context: &RunContext) -> IncomingCommand {
         .file_name()
         .expect("Could not determine base_name of directory");
 
-    let caddy_build_image_text = include_str!("../templates/caddy.Dockerfile");
-    let caddy_build_file_text = include_str!("../templates/Caddyfile");
+    let caddy_build_image_text = include_str!("../templates/contrib/caddy.Dockerfile");
+    let caddy_build_file_text = include_str!("../templates/contrib/Caddyfile");
     let caddy_build_tag: String = create_build_tag(&cwd_base_name, CADDY_TAG_SUFFIX);
     //    println!("caddy_build_tag = {}", caddy_build_tag);
 
