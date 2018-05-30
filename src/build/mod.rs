@@ -22,9 +22,9 @@ pub fn build_php(run_context: &RunContext) -> Result<IncomingCommand, Error> {
 }
 
 fn create_build_arg(
-    name: &'static str,
-    text: &'static str,
-    origin: &'static str,
+    name: &str,
+    text: &str,
+    origin: &str,
     mode: &RunMode,
 ) -> String {
     match mode {
@@ -33,7 +33,7 @@ fn create_build_arg(
     }
 }
 
-pub fn create_build_tag(base_name: &String, suffix: &'static str) -> String {
+pub fn create_build_tag(base_name: &String, suffix: &str) -> String {
     //    println!("base_name = {:?}", base_name);
     format!("{}__{}__{}", TAG_PREFIX, base_name, suffix)
 }

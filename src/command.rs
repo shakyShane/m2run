@@ -3,12 +3,12 @@ use std::io::{Error, ErrorKind, Write};
 use std::process::{Command, ExitStatus, Stdio};
 
 #[derive(Debug)]
-pub struct IncomingCommand {
-    pub command: &'static str,
+pub struct IncomingCommand<'a> {
+    pub command: &'a str,
     pub args: Vec<String>,
-    pub stdin: &'static str,
+    pub stdin: &'a str,
     pub env: HashMap<String, String>,
-    pub desc: &'static str,
+    pub desc: &'a str,
 }
 
 pub fn execute_command(cmd: IncomingCommand) -> Result<ExitStatus, Error> {
