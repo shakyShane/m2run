@@ -4,7 +4,10 @@ use command::execute_command;
 use context::RunContext;
 use context::RunMode;
 use context::get_run_context;
-use run::exec;
+use run::exec::exec;
+use run::stop::stop;
+use command::IncomingCommand;
+use run::down::down;
 
 mod build;
 mod command;
@@ -51,7 +54,7 @@ fn try_to_execute(run_context: RunContext) -> Result<(), String> {
                 }
                 RunMode::Execute => {
                     for task in tasks {
-                        execute_command(task.unwrap());
+                        execute_command(&task.unwrap());
                     }
                 }
             };
@@ -60,39 +63,54 @@ fn try_to_execute(run_context: RunContext) -> Result<(), String> {
         }
         Some(SubCommands::Exec) => {
             let task = exec(&run_context).unwrap();
-
-            match run_context.mode {
-                RunMode::DryRun => {
-                    println!("-------");
-                    println!("Task: 1, Desc: {}", task.desc);
-                    println!(
-                        "{}{}",
-                        task.command,
-                        task.args
-                            .iter()
-                            .fold("".into(), |acc: String, item| acc + " " + item)
-                    )
-                }
-                RunMode::Execute => {
-                    execute_command(task);
-                }
-            }
-            Ok(())
+            sub_command(&task, &run_context)
+        }
+        Some(SubCommands::Stop) => {
+            let task = stop(&run_context).unwrap();
+            sub_command(&task, &run_context)
+        }
+        Some(SubCommands::Down) => {
+            let task = down(&run_context).unwrap();
+            sub_command(&task, &run_context)
         }
         None => Err("Please run one of the supported commands".to_string()),
     }
+}
+
+fn sub_command(task: &IncomingCommand, run_context: &RunContext) -> Result<(), String> {
+    match run_context.mode {
+        RunMode::DryRun => {
+            println!("-------");
+            println!("Task: 1, Desc: {}", task.desc);
+            println!(
+                "{}{}",
+                task.command,
+                task.args
+                    .iter()
+                    .fold("".into(), |acc: String, item| acc + " " + item)
+            );
+        }
+        RunMode::Execute => {
+            execute_command(task);
+        }
+    }
+    Ok(())
 }
 
 #[derive(Debug, PartialEq)]
 enum SubCommands {
     Contrib,
     Exec,
+    Stop,
+    Down,
 }
 
 fn select_cmd(maybe_cmd: String) -> Option<SubCommands> {
     match &*maybe_cmd {
-        "contrib" | "c" => Some(SubCommands::Contrib),
+        "contrib" | "c" | "up" | "start" => Some(SubCommands::Contrib),
         "execute" | "exec" | "e" => Some(SubCommands::Exec),
+        "stop" => Some(SubCommands::Stop),
+        "down" | "d" => Some(SubCommands::Down),
         _ => None,
     }
 }

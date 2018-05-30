@@ -29,6 +29,7 @@ fn generate_options(raw_opts: Vec<String>) -> Result<Options, String> {
     let mut defaults = HashMap::new();
     defaults.insert("cwd".to_string(), os_cwd.to_string_lossy().to_string());
     defaults.insert("run_mode".to_string(), "execute".into());
+    defaults.insert("user".to_string(), "www-data".into());
 
     let indexes = 0..raw_opts.len();
     let terminator = indexes

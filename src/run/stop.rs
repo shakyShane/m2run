@@ -2,15 +2,10 @@ use command::IncomingCommand;
 use context::RunContext;
 use std::collections::HashMap;
 use std::io::Error;
+use run::DOCKER_COMPOSE_TEXT;
 
-pub mod exec;
-pub mod stop;
-pub mod down;
-
-pub const DOCKER_COMPOSE_TEXT: &'static str = include_str!("../templates/contrib/docker-compose.yml");
-
-pub fn run(run_context: &RunContext) -> Result<IncomingCommand, Error> {
-    let docker_compose_build_args = vec!["-f", "-", "up", "-d"]
+pub fn stop(run_context: &RunContext) -> Result<IncomingCommand, Error> {
+    let docker_compose_build_args = vec!["-f", "-", "stop"]
         .iter()
         .map(|x| x.to_string())
         .collect();
@@ -27,6 +22,6 @@ pub fn run(run_context: &RunContext) -> Result<IncomingCommand, Error> {
         args: docker_compose_build_args,
         stdin: DOCKER_COMPOSE_TEXT,
         env,
-        desc: "Runs the Application with docker-compose",
+        desc: "Stops the containers without losing information",
     })
 }

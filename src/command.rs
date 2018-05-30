@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::io::{Error, ErrorKind, Write};
 use std::process::{Command, ExitStatus, Stdio};
+use std::process::Output;
 
 #[derive(Debug)]
 pub struct IncomingCommand<'a> {
@@ -11,32 +12,56 @@ pub struct IncomingCommand<'a> {
     pub desc: &'a str,
 }
 
-pub fn execute_command(cmd: IncomingCommand) -> Result<ExitStatus, Error> {
+enum CommandType {
+    Stdin,
+    NoStdin
+}
+
+pub fn execute_command(cmd: &IncomingCommand) -> Result<ExitStatus, Error> {
+
+    // is there any stdin data?
+    let cmd_type = match cmd.stdin.len() {
+        0 => CommandType::NoStdin,
+        _ => CommandType::Stdin
+    };
+
+    let stdin_type = match cmd_type {
+        CommandType::Stdin => Stdio::piped(),
+        _ => Stdio::inherit()
+    };
+
     let process = Command::new(cmd.command)
         .args(&cmd.args)
         .envs(&cmd.env)
-        .stdin(Stdio::piped())
+        .stdin(stdin_type)
         .stdout(Stdio::inherit())
         .spawn();
 
-    match process {
-        Ok(mut child) => {
-            child
-                .stdin
-                .as_mut()
-                .unwrap()
-                .write_all(cmd.stdin.as_bytes());
-            match child.wait_with_output() {
-                Ok(output) => {
-                    if output.status.success() {
-                        Ok(output.status)
-                    } else {
-                        Err(Error::new(ErrorKind::Other, "Nope"))
-                    }
-                }
-                Err(e) => Err(e),
-            }
+    match cmd_type {
+        CommandType::Stdin => {
+            process
+                .and_then(|mut child| {
+                    child
+                        .stdin
+                        .as_mut()
+                        .unwrap()
+                        .write_all(cmd.stdin.as_bytes());
+                    child.wait_with_output()
+                })
+                .and_then(check_output)
+        },
+        CommandType::NoStdin => {
+            process
+                .and_then(|child| child.wait_with_output())
+                .and_then(check_output)
         }
-        Err(e) => Err(e),
+    }
+}
+
+fn check_output(output: Output) -> Result<ExitStatus, Error> {
+    if output.status.success() {
+        Ok(output.status)
+    } else {
+        Err(Error::new(ErrorKind::Other, "Nope"))
     }
 }
