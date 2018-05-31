@@ -9,12 +9,15 @@ use std::path::PathBuf;
 use std::process::Command;
 use std::process::ExitStatus;
 use std::process::Stdio;
+use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct RunContext {
     pub cwd: PathBuf,
+    pub env: HashMap<String, String>,
     pub cwd_file_name: String,
     pub name: String,
+    pub user: String,
     pub command: String,
     pub options: options::Options,
     pub mode: RunMode,
@@ -29,7 +32,7 @@ pub enum RunMode {
 pub fn create_run_context(options: options::Options) -> Result<RunContext, String> {
     let cwd_as_buf = options.cwd.to_path_buf();
     let context_name = cwd_as_buf.file_name().unwrap();
-    let as_string = context_name.to_string_lossy();
+    let context_name_as_string = context_name.to_string_lossy();
     let cmd = env::args().nth(1).or(Some("contrib".to_string())).unwrap();
 
     let mode: RunMode = match options.flags.get("run_mode") {
@@ -41,9 +44,24 @@ pub fn create_run_context(options: options::Options) -> Result<RunContext, Strin
         None => RunMode::Execute,
     };
 
+    let user = match options.flags.get("user") {
+        Some(user) => match user.as_str() {
+            "root" | "r" => "root",
+            _ => "www-data"
+        },
+        None => "www-data"
+    };
+
+    let mut env: HashMap<String, String> = HashMap::new();
+
+    env.insert(
+        "M2RUN_CONTEXT_NAME".to_string(),
+        context_name_as_string.to_string(),
+    );
+
     Ok(RunContext {
         cwd: options.cwd.to_path_buf(),
-        name: as_string.to_string(),
+        name: context_name_as_string.to_string(),
         command: cmd,
         cwd_file_name: options
             .cwd
@@ -53,6 +71,8 @@ pub fn create_run_context(options: options::Options) -> Result<RunContext, Strin
             .to_string(),
         options: options,
         mode,
+        env,
+        user: user.to_string()
     })
 }
 

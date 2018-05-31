@@ -54,7 +54,7 @@ fn try_to_execute(run_context: RunContext) -> Result<(), String> {
                 }
                 RunMode::Execute => {
                     for task in tasks {
-                        execute_command(&task.unwrap());
+                        execute_command(&task.unwrap(), &run_context);
                     }
                 }
             };
@@ -91,7 +91,7 @@ fn sub_command(task: &IncomingCommand, run_context: &RunContext) -> Result<(), S
             );
         }
         RunMode::Execute => {
-            execute_command(task);
+            execute_command(task, &run_context);
         }
     }
     Ok(())

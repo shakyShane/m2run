@@ -9,18 +9,13 @@ pub mod down;
 
 pub const DOCKER_COMPOSE_TEXT: &'static str = include_str!("../templates/contrib/docker-compose.yml");
 
-pub fn run(run_context: &RunContext) -> Result<IncomingCommand, Error> {
+pub fn run(_run_context: &RunContext) -> Result<IncomingCommand, Error> {
     let docker_compose_build_args = vec!["-f", "-", "up", "-d"]
         .iter()
         .map(|x| x.to_string())
         .collect();
 
-    let mut env: HashMap<String, String> = HashMap::new();
-
-    env.insert(
-        "M2RUN_CONTEXT_NAME".to_string(),
-        run_context.name.to_string(),
-    );
+    let env: HashMap<String, String> = HashMap::new();
 
     Ok(IncomingCommand {
         command: "docker-compose",

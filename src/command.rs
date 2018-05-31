@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::io::{Error, ErrorKind, Write};
 use std::process::{Command, ExitStatus, Stdio};
 use std::process::Output;
+use context::RunContext;
 
 #[derive(Debug)]
 pub struct IncomingCommand<'a> {
@@ -17,7 +18,7 @@ enum CommandType {
     NoStdin
 }
 
-pub fn execute_command(cmd: &IncomingCommand) -> Result<ExitStatus, Error> {
+pub fn execute_command(cmd: &IncomingCommand, run_context: &RunContext) -> Result<ExitStatus, Error> {
 
     // is there any stdin data?
     let cmd_type = match cmd.stdin.len() {
@@ -30,9 +31,20 @@ pub fn execute_command(cmd: &IncomingCommand) -> Result<ExitStatus, Error> {
         _ => Stdio::inherit()
     };
 
+//    let merged_env: &HashMap<String, String> = run_context.env.into_iter().chain(cmd.env);
+    let mut new_map: HashMap<String, String> = HashMap::new();
+    for (ref k, ref v) in &run_context.env {
+        println!("k={}, v={}", k, v);
+        new_map.insert(k.to_string(), v.to_string());
+    }
+    for (ref k, ref v) in &cmd.env {
+        println!("{}, {}", k, v);
+        new_map.insert(k.to_string(), v.to_string());
+    }
+
     let process = Command::new(cmd.command)
         .args(&cmd.args)
-        .envs(&cmd.env)
+        .envs(&new_map)
         .stdin(stdin_type)
         .stdout(Stdio::inherit())
         .spawn();
