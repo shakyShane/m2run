@@ -31,14 +31,11 @@ pub fn execute_command(cmd: &IncomingCommand, run_context: &RunContext) -> Resul
         _ => Stdio::inherit()
     };
 
-//    let merged_env: &HashMap<String, String> = run_context.env.into_iter().chain(cmd.env);
     let mut new_map: HashMap<String, String> = HashMap::new();
     for (ref k, ref v) in &run_context.env {
-        println!("k={}, v={}", k, v);
         new_map.insert(k.to_string(), v.to_string());
     }
     for (ref k, ref v) in &cmd.env {
-        println!("{}, {}", k, v);
         new_map.insert(k.to_string(), v.to_string());
     }
 
