@@ -6,6 +6,7 @@ use std::io::Error;
 pub mod exec;
 pub mod stop;
 pub mod down;
+pub mod start;
 
 pub const DOCKER_COMPOSE_TEXT: &'static str = include_str!("../templates/contrib/docker-compose.yml");
 

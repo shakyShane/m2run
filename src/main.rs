@@ -8,6 +8,8 @@ use run::exec::exec;
 use run::stop::stop;
 use command::IncomingCommand;
 use run::down::down;
+use run::start::start;
+use std::io::Error;
 
 mod build;
 mod command;
@@ -29,37 +31,8 @@ fn main() {
 fn try_to_execute(run_context: RunContext) -> Result<(), String> {
     match select_cmd(run_context.command.to_string()) {
         Some(SubCommands::Contrib) => {
-            let build_docker = build::build_php(&run_context);
-            let build_caddy = build::build_caddy(&run_context);
-            let run_compose = run::run(&run_context);
-
-            let tasks = vec![build_docker, build_caddy, run_compose];
-
-            match run_context.mode {
-                RunMode::DryRun => {
-                    let indexes = 0..tasks.len();
-                    for (index, task) in indexes.zip(tasks) {
-                        let unwrapped = task.unwrap();
-                        println!("-------");
-                        println!("Task: {}, Desc: {}", index + 1, unwrapped.desc);
-                        println!(
-                            "{}{}",
-                            unwrapped.command,
-                            unwrapped
-                                .args
-                                .iter()
-                                .fold("".into(), |acc: String, item| acc + " " + item)
-                        );
-                    }
-                }
-                RunMode::Execute => {
-                    for task in tasks {
-                        execute_command(&task.unwrap(), &run_context);
-                    }
-                }
-            };
-
-            Ok(())
+            let ts = start(&run_context);
+            sub_command_multi(&ts, &run_context)
         }
         Some(SubCommands::Exec) => {
             let task = exec(&run_context).unwrap();
@@ -94,6 +67,39 @@ fn sub_command(task: &IncomingCommand, run_context: &RunContext) -> Result<(), S
             execute_command(task, &run_context);
         }
     }
+    Ok(())
+}
+
+fn sub_command_multi(tasks: &Vec<Result<IncomingCommand, Error>>, run_context: &RunContext) -> Result<(), String> {
+    match run_context.mode {
+        RunMode::DryRun => {
+            let indexes = 0..tasks.len();
+
+//            for (index, task) in indexes.zip(tasks.iter()) {
+//                let unwrapped = task.unwrap();
+//                println!("-------");
+//                println!("Task: {}, Desc: {}", index + 1, unwrapped.desc);
+//                println!(
+//                    "{}{}",
+//                    unwrapped.command,
+//                    unwrapped
+//                        .args
+//                        .iter()
+//                        .fold("".into(), |acc: String, item| acc + " " + item)
+//                );
+//            }
+        }
+        RunMode::Execute => {
+//            let unwrapped = tasks.iter().map(|x| x.unwrap());
+            for ref task in tasks {
+                println!("{:?}", task);
+                let t = &task.unwrap();
+//                let t = task.unwrap();
+//                execute_command(, &run_context);
+            }
+        }
+    };
+
     Ok(())
 }
 
