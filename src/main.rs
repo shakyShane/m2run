@@ -31,7 +31,7 @@ fn main() {
 fn try_to_execute(run_context: RunContext) -> Result<(), String> {
     match select_cmd(run_context.command.to_string()) {
         Some(SubCommands::Contrib) => {
-            let ts = start(&run_context);
+            let ts = start(&run_context).unwrap();
             sub_command_multi(&ts, &run_context)
         }
         Some(SubCommands::Exec) => {
@@ -70,7 +70,7 @@ fn sub_command(task: &IncomingCommand, run_context: &RunContext) -> Result<(), S
     Ok(())
 }
 
-fn sub_command_multi(tasks: &Vec<Result<IncomingCommand, Error>>, run_context: &RunContext) -> Result<(), String> {
+fn sub_command_multi(tasks: &Vec<IncomingCommand>, run_context: &RunContext) -> Result<(), String> {
     match run_context.mode {
         RunMode::DryRun => {
             let indexes = 0..tasks.len();
@@ -91,11 +91,11 @@ fn sub_command_multi(tasks: &Vec<Result<IncomingCommand, Error>>, run_context: &
         }
         RunMode::Execute => {
 //            let unwrapped = tasks.iter().map(|x| x.unwrap());
-            for ref task in tasks {
-                println!("{:?}", task);
-                let t = &task.unwrap();
+            for task in tasks.iter() {
+//                println!("{:?}", task);
+//                let ref t = &ta;
 //                let t = task.unwrap();
-//                execute_command(, &run_context);
+                execute_command(&task, &run_context);
             }
         }
     };
