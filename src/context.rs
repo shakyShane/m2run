@@ -29,20 +29,28 @@ pub enum RunMode {
     Execute,
 }
 
-pub fn create_run_context(options: options::Options) -> Result<RunContext, String> {
-    let cwd_as_buf = options.cwd.to_path_buf();
-    let context_name = cwd_as_buf.file_name().unwrap();
-    let context_name_as_string = context_name.to_string_lossy();
-    let cmd = env::args().nth(1).or(Some("contrib".to_string())).unwrap();
-
-    let mode: RunMode = match options.flags.get("run_mode") {
+fn select_mode(set_mode: Option<&String>) -> RunMode {
+    match set_mode {
         Some(mode) => match mode.as_str() {
             "execute" | "exe" => RunMode::Execute,
             "dry_run" | "dryrun" | "dryRun" => RunMode::DryRun,
             _ => RunMode::Execute,
         },
         None => RunMode::Execute,
-    };
+    }
+}
+
+fn select_cmd(maybe_command: Option<String>) -> String {
+    maybe_command.or(Some("contrib".to_string())).unwrap()
+}
+
+pub fn create_run_context(options: options::Options) -> Result<RunContext, String> {
+    let cwd_as_buf = options.cwd.to_path_buf();
+    let context_name = cwd_as_buf.file_name().unwrap();
+    let context_name_as_string = context_name.to_string_lossy();
+
+    let cmd = select_cmd(env::args().nth(1));
+    let mode = select_mode(options.flags.get("run_mode"));
 
     let user = match options.flags.get("user") {
         Some(user) => match user.as_str() {
