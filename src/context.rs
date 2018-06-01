@@ -45,10 +45,10 @@ pub fn get_run_context() -> Result<RunContext, String> {
 
 pub fn create_run_context(options: options::Options, mut args: Args) -> Result<RunContext, String> {
 
-    let ctx_name = get_context_name(&options);
-    let cmd  = select_cmd(args.nth(1));
-    let mode = select_mode(options.flags.get("run_mode"));
-    let user = select_user(options.flags.get("user"));
+    let ctx_name    = get_context_name(&options);
+    let cmd         = select_cmd(args.nth(1));
+    let mode        = select_mode(options.flags.get("run_mode"));
+    let user        = select_user(options.flags.get("user"));
     let default_env = get_default_env(&ctx_name);
 
     Ok(RunContext {
@@ -66,8 +66,7 @@ pub fn create_run_context(options: options::Options, mut args: Args) -> Result<R
 fn get_context_name(options: &options::Options) -> String {
     let cwd_as_buf = options.cwd.to_path_buf();
     let context_name = cwd_as_buf.file_name().unwrap();
-    let context_name_as_string = context_name.to_string_lossy().to_string();
-    context_name_as_string
+    context_name.to_string_lossy().to_string()
 }
 
 fn get_default_env(name: &String) -> HashMap<String, String> {
