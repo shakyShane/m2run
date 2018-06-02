@@ -12,7 +12,7 @@ pub struct Options {
 }
 
 pub fn get_options() -> Result<Options, String> {
-    collect_args().and_then(generate_options)
+    collect_args().and_then(|args| generate_options(&args, current_working_dir()))
 }
 
 fn collect_args() -> Result<Vec<String>, String> {
@@ -24,8 +24,7 @@ fn collect_args() -> Result<Vec<String>, String> {
     }
 }
 
-fn create_defaults() -> HashMap<String, String> {
-    let os_cwd = current_working_dir();
+fn create_defaults(os_cwd: PathBuf) -> HashMap<String, String> {
     let mut defaults = HashMap::new();
 
     defaults.insert("cwd".into(), os_cwd.to_string_lossy().into());
@@ -34,19 +33,11 @@ fn create_defaults() -> HashMap<String, String> {
     defaults
 }
 
-fn generate_options(raw_opts: Vec<String>) -> Result<Options, String> {
-    let defaults = create_defaults();
-    let indexes = 0..raw_opts.len();
-    let terminator = indexes
-        .zip(raw_opts.iter())
-        .find(|&(_i, opt)| *opt == "--");
+pub fn generate_options(raw_opts: &Vec<String>, os_cwd: PathBuf) -> Result<Options, String> {
 
-    let trailing = match terminator {
-        Some((index, _opt)) => &raw_opts[(index + 1)..],
-        None => &raw_opts[2..],
-    };
-
-    let flags = create_flags_hash(raw_opts[2..].to_vec(), defaults);
+    let defaults = create_defaults(os_cwd);
+    let trailing = get_trailing(&raw_opts);
+    let flags = create_flags_hash(opts_without_cmd(&raw_opts).to_vec(), defaults);
     let cwd_as_buf: PathBuf = flags.get("cwd").unwrap().into();
 
     Ok(Options {
@@ -55,6 +46,30 @@ fn generate_options(raw_opts: Vec<String>) -> Result<Options, String> {
         trailing: trailing.to_vec(),
         raw: raw_opts.to_vec(),
     })
+}
+
+fn opts_without_cmd(raw_opts: &Vec<String>) -> &[String] {
+    match raw_opts.len() {
+        0...1 => &[],
+        _ => &raw_opts[2..]
+    }
+}
+
+fn get_trailing(raw_opts: &Vec<String>) -> &[String] {
+    let len = raw_opts.len();
+    let indexes = 0..len;
+
+    let terminator = indexes
+        .zip(raw_opts.iter())
+        .find(|&(_i, opt)| *opt == "--");
+
+    match len {
+        0...1 => &[],
+        _ => match terminator {
+            Some((index, _opt)) => &raw_opts[(index + 1)..],
+            None => &raw_opts[2..],
+        }
+    }
 }
 
 fn create_flags_hash(

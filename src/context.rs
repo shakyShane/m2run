@@ -10,7 +10,7 @@ use std::process::Command;
 use std::process::ExitStatus;
 use std::process::Stdio;
 use std::collections::HashMap;
-use std::env::Args;
+use options::generate_options;
 
 #[derive(Debug)]
 pub struct RunContext {
@@ -19,7 +19,7 @@ pub struct RunContext {
     pub cwd_file_name: String,
     pub name: String,
     pub user: String,
-    pub command: String,
+    pub command: Option<String>,
     pub options: options::Options,
     pub mode: RunMode,
 }
@@ -36,31 +36,43 @@ pub fn get_run_context() -> Result<RunContext, String> {
     has_docker()
         .and_then(|_x| get_options())
         .and_then(|options: Options| {
+            let cmd = env::args().nth(1);
             is_valid_dir(&options.cwd)
                 .and_then(verify_files)
                 .and_then(set_working_dir)
-                .and_then(|_| create_run_context(options, env::args()))
+                .and_then(|_| create_run_context(options, cmd))
         })
 }
 
-pub fn create_run_context(options: options::Options, mut args: Args) -> Result<RunContext, String> {
+pub fn create_run_context(options: options::Options, cmd: Option<String>) -> Result<RunContext, String> {
 
     let ctx_name    = get_context_name(&options);
-    let cmd         = select_cmd(args.nth(1));
+    let cmd         = select_cmd(cmd);
     let mode        = select_mode(options.flags.get("run_mode"));
     let user        = select_user(options.flags.get("user"));
     let default_env = get_default_env(&ctx_name);
 
     Ok(RunContext {
-        cwd: options.cwd.to_path_buf(),
-        name: ctx_name.to_string(),
         command: cmd,
+        cwd: PathBuf::from(&options.cwd),
         cwd_file_name: ctx_name.to_string(),
+        env: default_env,
         options,
         mode,
-        env: default_env,
+        name: ctx_name.to_string(),
         user: user.to_string()
     })
+}
+
+#[test]
+fn test_create_run_context() {
+    let cwd = "/Users/shakyshane/Downloads/magento2-2.2-develop";
+    let raw_opts = vec!["m2run"].iter().map(|x| x.to_string()).collect();
+    let opts = generate_options(&raw_opts, PathBuf::from(cwd)).unwrap();
+    let ctx = create_run_context(opts, Some("e".into())).unwrap();
+    assert_eq!(ctx.env.get("M2RUN_CONTEXT_NAME").unwrap(), "magento2-2.2-develop");
+    assert_eq!(ctx.options.flags.get("user").unwrap(), "www-data");
+    assert_eq!(ctx.options.flags.get("run_mode").unwrap(), "execute");
 }
 
 fn get_context_name(options: &options::Options) -> String {
@@ -101,8 +113,11 @@ fn select_user<'a>(set_user: Option<&String>) -> &'a str {
     }
 }
 
-fn select_cmd(maybe_command: Option<String>) -> String {
-    maybe_command.or(Some("contrib".to_string())).unwrap()
+fn select_cmd(maybe_command: Option<String>) -> Option<String> {
+    match maybe_command {
+        Some(cmd) => Some(cmd),
+        None => Some("help".into())
+    }
 }
 
 fn set_working_dir(path_buf: &PathBuf) -> Result<(), String> {

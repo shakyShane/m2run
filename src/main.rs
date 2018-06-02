@@ -9,7 +9,6 @@ use run::stop::stop;
 use command::IncomingCommand;
 use run::down::down;
 use run::start::start;
-use std::io::Error;
 
 mod build;
 mod command;
@@ -29,7 +28,7 @@ fn main() {
 }
 
 fn try_to_execute(run_context: RunContext) -> Result<(), String> {
-    match select_cmd(run_context.command.to_string()) {
+    match select_cmd(&run_context.command) {
         Some(SubCommands::Contrib) => {
             let ts = start(&run_context).unwrap();
             sub_command_multi(&ts, &run_context)
@@ -53,15 +52,7 @@ fn try_to_execute(run_context: RunContext) -> Result<(), String> {
 fn sub_command(task: &IncomingCommand, run_context: &RunContext) -> Result<(), String> {
     match run_context.mode {
         RunMode::DryRun => {
-            println!("-------");
-            println!("Task: 1, Desc: {}", task.desc);
-            println!(
-                "{}{}",
-                task.command,
-                task.args
-                    .iter()
-                    .fold("".into(), |acc: String, item| acc + " " + item)
-            );
+            println!("{}", format_one(1, task))
         }
         RunMode::Execute => {
             execute_command(task, &run_context);
@@ -70,31 +61,25 @@ fn sub_command(task: &IncomingCommand, run_context: &RunContext) -> Result<(), S
     Ok(())
 }
 
+fn format_one(number: usize, task: &IncomingCommand) -> String {
+    format!("Task {}, Desc: {}
+{}{}", number, task.desc, task.command, task
+        .args
+        .iter()
+        .fold("".into(), |acc: String, item| acc + " " + item))
+}
+
 fn sub_command_multi(tasks: &Vec<IncomingCommand>, run_context: &RunContext) -> Result<(), String> {
     match run_context.mode {
         RunMode::DryRun => {
             let indexes = 0..tasks.len();
 
-//            for (index, task) in indexes.zip(tasks.iter()) {
-//                let unwrapped = task.unwrap();
-//                println!("-------");
-//                println!("Task: {}, Desc: {}", index + 1, unwrapped.desc);
-//                println!(
-//                    "{}{}",
-//                    unwrapped.command,
-//                    unwrapped
-//                        .args
-//                        .iter()
-//                        .fold("".into(), |acc: String, item| acc + " " + item)
-//                );
-//            }
+            for (index, task) in indexes.zip(tasks.iter()) {
+                println!("{}", format_one(index, &task))
+            }
         }
         RunMode::Execute => {
-//            let unwrapped = tasks.iter().map(|x| x.unwrap());
             for task in tasks.iter() {
-//                println!("{:?}", task);
-//                let ref t = &ta;
-//                let t = task.unwrap();
                 execute_command(&task, &run_context);
             }
         }
@@ -111,25 +96,30 @@ enum SubCommands {
     Down,
 }
 
-fn select_cmd(maybe_cmd: String) -> Option<SubCommands> {
-    match &*maybe_cmd {
-        "contrib" | "c" | "up" | "start" => Some(SubCommands::Contrib),
-        "execute" | "exec" | "e" => Some(SubCommands::Exec),
-        "stop" => Some(SubCommands::Stop),
-        "down" | "d" => Some(SubCommands::Down),
-        _ => None,
+fn select_cmd(maybe_cmd: &Option<String>) -> Option<SubCommands> {
+    match *maybe_cmd {
+        Some(ref cmd_as_string) => {
+            match &**cmd_as_string {
+                "contrib" | "c" | "up" | "start" => Some(SubCommands::Contrib),
+                "execute" | "exec" | "e" => Some(SubCommands::Exec),
+                "stop" => Some(SubCommands::Stop),
+                "down" | "d" => Some(SubCommands::Down),
+                _ => None,
+            }
+        },
+        None => None
     }
 }
 
 #[test]
 fn select_cmd_contrib_test() {
-    let res = select_cmd("contrib".to_string());
+    let res = select_cmd(&Some("contrib".into()));
     let expected = Some(SubCommands::Contrib);
     assert_eq!(res, expected);
 }
 #[test]
 fn select_cmd_contrib_short_test() {
-    let res = select_cmd("c".to_string());
+    let res = select_cmd(&Some("c".into()));
     let expected = Some(SubCommands::Contrib);
     assert_eq!(res, expected);
 }
