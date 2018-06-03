@@ -3,6 +3,7 @@ use std::io::{Error, ErrorKind, Write};
 use std::process::{Command, ExitStatus, Stdio};
 use std::process::Output;
 use context::RunContext;
+use core::fmt;
 
 #[derive(Debug)]
 pub struct IncomingCommand<'a> {
@@ -13,6 +14,17 @@ pub struct IncomingCommand<'a> {
     pub desc: &'a str,
 }
 
+impl<'a> fmt::Display for IncomingCommand<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let args = self.args
+            .iter()
+            .fold("".into(), |acc: String, item| acc + " " + item);
+
+        write!(f, "Description: {}\nCommand:\n\n    {}{}", self.desc, self.command, args)
+    }
+}
+
+#[derive(Debug)]
 enum CommandType {
     Stdin,
     NoStdin

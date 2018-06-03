@@ -1,7 +1,6 @@
 use files::verify_files;
 use options;
-use options::Options;
-use options::get_options;
+use options::{Options, get_options};
 use std::env;
 use std::env::current_dir;
 use std::env::set_current_dir;
@@ -10,7 +9,6 @@ use std::process::Command;
 use std::process::ExitStatus;
 use std::process::Stdio;
 use std::collections::HashMap;
-use options::generate_options;
 
 #[derive(Debug)]
 pub struct RunContext {
@@ -66,6 +64,7 @@ pub fn create_run_context(options: options::Options, cmd: Option<String>) -> Res
 
 #[test]
 fn test_create_run_context() {
+    use options::{generate_options};
     let cwd = "/Users/shakyshane/Downloads/magento2-2.2-develop";
     let raw_opts = vec!["m2run"].iter().map(|x| x.to_string()).collect();
     let opts = generate_options(&raw_opts, PathBuf::from(cwd)).unwrap();
@@ -76,8 +75,7 @@ fn test_create_run_context() {
 }
 
 fn get_context_name(options: &options::Options) -> String {
-    let cwd_as_buf = options.cwd.to_path_buf();
-    let context_name = cwd_as_buf.file_name().unwrap();
+    let context_name = options.cwd.file_name().unwrap();
     context_name.to_string_lossy().to_string()
 }
 

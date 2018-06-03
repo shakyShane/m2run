@@ -1,5 +1,7 @@
 #![allow(unused_must_use)]
 
+extern crate core;
+
 use command::execute_command;
 use context::RunContext;
 use context::RunMode;
@@ -30,8 +32,8 @@ fn main() {
 fn try_to_execute(run_context: RunContext) -> Result<(), String> {
     match select_cmd(&run_context.command) {
         Some(SubCommands::Contrib) => {
-            let ts = start(&run_context).unwrap();
-            sub_command_multi(&ts, &run_context)
+            let tasks = start(&run_context).unwrap();
+            sub_command_multi(&tasks, &run_context)
         }
         Some(SubCommands::Exec) => {
             let task = exec(&run_context).unwrap();
@@ -52,7 +54,7 @@ fn try_to_execute(run_context: RunContext) -> Result<(), String> {
 fn sub_command(task: &IncomingCommand, run_context: &RunContext) -> Result<(), String> {
     match run_context.mode {
         RunMode::DryRun => {
-            println!("{}", format_one(1, task))
+            println!("\nTask: {}\n{}", 1, task)
         }
         RunMode::Execute => {
             execute_command(task, &run_context);
@@ -61,21 +63,13 @@ fn sub_command(task: &IncomingCommand, run_context: &RunContext) -> Result<(), S
     Ok(())
 }
 
-fn format_one(number: usize, task: &IncomingCommand) -> String {
-    format!("Task {}, Desc: {}
-{}{}", number, task.desc, task.command, task
-        .args
-        .iter()
-        .fold("".into(), |acc: String, item| acc + " " + item))
-}
-
 fn sub_command_multi(tasks: &Vec<IncomingCommand>, run_context: &RunContext) -> Result<(), String> {
     match run_context.mode {
         RunMode::DryRun => {
             let indexes = 0..tasks.len();
 
             for (index, task) in indexes.zip(tasks.iter()) {
-                println!("{}", format_one(index, &task))
+                println!("\nTask: {}\n{}", index + 1, task)
             }
         }
         RunMode::Execute => {
