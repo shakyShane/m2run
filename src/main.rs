@@ -18,6 +18,7 @@ mod context;
 mod files;
 mod options;
 mod run;
+mod flags;
 
 fn main() {
     match get_run_context() {
