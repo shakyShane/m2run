@@ -22,7 +22,9 @@ mod run;
 fn main() {
     match get_run_context() {
         Ok(run_context) => match try_to_execute(run_context) {
-            Ok(_x) => {}
+            Ok(_x) => {
+                /* */
+            }
             Err(msg) => println!("Could not run. \nReason: {}", msg),
         },
         Err(msg) => println!("Could not create the Run Context. \nReason: {}", msg),

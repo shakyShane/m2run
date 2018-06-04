@@ -33,29 +33,69 @@ fn create_defaults(os_cwd: PathBuf) -> HashMap<String, String> {
     defaults
 }
 
-pub fn generate_options(raw_opts: &Vec<String>, os_cwd: PathBuf) -> Result<Options, String> {
+pub fn generate_options(raw_args: &Vec<String>, os_cwd: PathBuf) -> Result<Options, String> {
 
     let defaults = create_defaults(os_cwd);
-    let trailing = get_trailing(&raw_opts);
-    let flags = create_flags_hash(opts_without_cmd(&raw_opts).to_vec(), defaults);
+    let (before, trailing, has_terminator) = split_args(&raw_args);
+    let program_args = match has_terminator {
+        true => before,
+        false => trailing
+    };
+    let flags = create_flags_hash(opts_without_cmd(&program_args).to_vec(), defaults);
     let cwd_as_buf: PathBuf = flags.get("cwd").unwrap().into();
 
     Ok(Options {
         cwd: cwd_as_buf,
         flags,
         trailing: trailing.to_vec(),
-        raw: raw_opts.to_vec(),
+        raw: raw_args.to_vec(),
     })
 }
 
-fn opts_without_cmd(raw_opts: &Vec<String>) -> &[String] {
+#[test]
+fn test_generate_options_1() {
+    let opts = vec!["m2run", "e", "--cwd", "/user", "--run_mode", "dry_run",  "--", "ls"].iter().map(|x| x.to_string()).collect();
+    let os_cwd = PathBuf::from("/users/shane");
+    let opts = generate_options(&opts, os_cwd).unwrap();
+    assert_eq!(opts.flags.get("run_mode"), Some(&"dry_run".to_string()));
+    assert_eq!(opts.flags.get("cwd"), Some(&"/user".to_string()));
+    assert_eq!(opts.trailing.get(0), Some(&"ls".to_string()));
+}
+#[test]
+fn test_generate_options_2() {
+    let opts = vec!["m2run", "e", "ls"].iter().map(|x| x.to_string()).collect();
+    let os_cwd = PathBuf::from("/users/shane");
+    let opts = generate_options(&opts, os_cwd).unwrap();
+    assert_eq!(opts.flags.get("run_mode"), Some(&"execute".to_string()));
+    assert_eq!(opts.trailing.get(0), Some(&"ls".to_string()));
+}
+#[test]
+fn test_generate_options_3() {
+    let opts = vec!["m2run", "e", "--user", "root", "--", "ls"].iter().map(|x| x.to_string()).collect();
+    let os_cwd = PathBuf::from("/users/shane");
+    let opts = generate_options(&opts, os_cwd).unwrap();
+    assert_eq!(opts.flags.get("run_mode"), Some(&"execute".to_string()));
+    assert_eq!(opts.flags.get("user"), Some(&"root".to_string()));
+    assert_eq!(opts.trailing.get(0), Some(&"ls".to_string()));
+}
+#[test]
+fn test_generate_options_4() {
+    let opts = vec!["m2run", "e", "--user", "--cwd", "/users/kittie", "--", "ls"].iter().map(|x| x.to_string()).collect();
+    let os_cwd = PathBuf::from("/users/shane");
+    let opts = generate_options(&opts, os_cwd).unwrap();
+    assert_eq!(opts.flags.get("cwd"), Some(&"/users/kittie".to_string()));
+    assert_eq!(opts.flags.get("user"), Some(&"www-data".to_string()));
+    assert_eq!(opts.trailing.get(0), Some(&"ls".to_string()));
+}
+
+fn opts_without_cmd(raw_opts: &[String]) -> &[String] {
     match raw_opts.len() {
         0...1 => &[],
         _ => &raw_opts[2..]
     }
 }
 
-fn get_trailing(raw_opts: &Vec<String>) -> &[String] {
+fn split_args(raw_opts: &Vec<String>) -> (&[String], &[String], bool) {
     let len = raw_opts.len();
     let indexes = 0..len;
 
@@ -64,10 +104,12 @@ fn get_trailing(raw_opts: &Vec<String>) -> &[String] {
         .find(|&(_i, opt)| *opt == "--");
 
     match len {
-        0...1 => &[],
+        0...1 => (&[], &[], false),
         _ => match terminator {
-            Some((index, _opt)) => &raw_opts[(index + 1)..],
-            None => &raw_opts[2..],
+            Some((index, _opt)) => {
+                (&raw_opts[..index], &raw_opts[(index + 1)..], true)
+            },
+            None => (&[], &raw_opts[2..], false)
         }
     }
 }
@@ -81,15 +123,23 @@ fn create_flags_hash(
     for (key, val) in defaults.iter() {
         let flag = format!("--{}", key);
         let indexes = 0..opts.len();
-        let iter = indexes.zip(opts.iter());
+        let mut iter = indexes.zip(opts.iter());
+        let matches = iter.find(|&(_, opt)| flag == *opt.as_str());
 
-        let matches: Vec<(usize, &String)> =
-            iter.filter(|&(_, opt)| flag == *opt.as_str()).collect();
-
-        match matches.get(0) {
-            Some(&(index, _)) => {
+        match matches {
+            Some((index, _)) => {
                 if let Some(next) = opts.get(index + 1) {
-                    map.insert(key.to_string(), next.to_string());
+                    let first_char = next.chars().next().unwrap().to_string();
+                    match &*first_char {
+                        "-" => {
+                            map.insert(key.to_string(), val.to_string());
+                        },
+                        _ => {
+                            map.insert(key.to_string(), next.to_string());
+                        },
+                    }
+                } else {
+                    println!("key={}", key);
                 }
             }
             None => {
