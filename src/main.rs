@@ -32,19 +32,19 @@ fn main() {
 fn try_to_execute(run_context: RunContext) -> Result<(), String> {
     match select_cmd(&run_context.command) {
         Some(SubCommands::Contrib) => {
-            let tasks = start(&run_context).unwrap();
+            let tasks = start(&run_context);
             sub_command_multi(&tasks, &run_context)
         }
         Some(SubCommands::Exec) => {
-            let task = exec(&run_context).unwrap();
+            let task = exec(&run_context);
             sub_command(&task, &run_context)
         }
         Some(SubCommands::Stop) => {
-            let task = stop(&run_context).unwrap();
+            let task = stop(&run_context);
             sub_command(&task, &run_context)
         }
         Some(SubCommands::Down) => {
-            let task = down(&run_context).unwrap();
+            let task = down(&run_context);
             sub_command(&task, &run_context)
         }
         None => Err("Please run one of the supported commands".to_string()),
@@ -57,7 +57,12 @@ fn sub_command(task: &IncomingCommand, run_context: &RunContext) -> Result<(), S
             println!("\nTask: {}\n{}", 1, task)
         }
         RunMode::Execute => {
-            execute_command(task, &run_context);
+            match execute_command(task, &run_context) {
+                Ok(_output) => {
+                    /* the command exited successfully */
+                },
+                Err(_e) => println!("The following command returned a non-zero exit code\n{}", task)
+            }
         }
     }
     Ok(())
@@ -74,7 +79,7 @@ fn sub_command_multi(tasks: &Vec<IncomingCommand>, run_context: &RunContext) -> 
         }
         RunMode::Execute => {
             for task in tasks.iter() {
-                execute_command(&task, &run_context);
+                execute_command(task, &run_context);
             }
         }
     };
