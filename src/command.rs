@@ -5,7 +5,7 @@ use std::process::Output;
 use context::RunContext;
 use core::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct IncomingCommand<'a> {
     pub command: &'a str,
     pub args: Vec<String>,

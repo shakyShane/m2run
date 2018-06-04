@@ -25,3 +25,6 @@ VOLUME ["/var/www/app/etc"]
 VOLUME ["/var/www/pub"]
 VOLUME ["/var/www/setup"]
 VOLUME ["/var/www/var"]
+
+ENTRYPOINT ["/usr/local/bin/docker-configure"]
+CMD ["php-fpm"]
