@@ -1,67 +1,96 @@
 use std::env::current_dir;
+use std::fmt;
 
 #[derive(Debug)]
-pub enum FlagValue<T> {
-    Boolean(T),
-    String(T),
-}
-
-#[derive(Debug)]
-pub enum BoolFlag {
+pub enum Boolean {
     True,
-    False,
+    False
 }
 
 #[derive(Debug)]
-pub struct Flag<T> {
-    value: FlagValue<T>,
+pub struct BooleanFlag {
+    value: Boolean,
     name: String,
     short: String,
     description: String
 }
 
-impl <T> Flag<T> {
-    fn get_value(&self) -> &FlagValue<T> {
-        match &self.value {
-            FlagValue::Boolean(t) => println!("ye"),
-            FlagValue::String(t) => println!("ye"),
-        }
-    }
+
+#[derive(Debug)]
+pub struct StringFlag {
+    value: String,
+    name: String,
+    short: String,
+    description: String
 }
 
 #[derive(Debug)]
+enum RunMode {
+    Execute,
+    DryRun
+}
+
+#[derive(Debug)]
+pub struct ChoiceFlag<T> {
+    value: T,
+    name: String,
+    short: String,
+    description: String
+}
+
+
+#[derive(Debug)]
 pub struct Flags {
-    quiet: Flag<BoolFlag>,
-    user: Flag<String>,
+    quiet: BooleanFlag,
+    user: StringFlag,
+    run_mode: ChoiceFlag<RunMode>,
+}
+
+impl fmt::Display for Flags {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "hello world!")
+    }
 }
 
 #[test]
 fn test_flags() {
     let mut flags = Flags {
-        quiet: Flag {
+        quiet: BooleanFlag {
             short: "q".into(),
             name: "quiet".into(),
             description: "Should the output be quiet".into(),
-            value: FlagValue::Boolean(BoolFlag::True),
+            value: Boolean::True,
         },
-        user: Flag {
+        user: StringFlag {
             short: "u".into(),
             name: "user".into(),
             description: "The user to run commands under".into(),
-            value: FlagValue::String(String::from("www-data")),
-        }
+            value: String::from("www-data"),
+        },
+        run_mode: ChoiceFlag {
+            short: "u".into(),
+            name: "user".into(),
+            description: "The user to run commands under".into(),
+            value: RunMode::Execute,
+        },
     };
 
     look_at_flags(&mut flags);
 }
 
 fn look_at_flags(flags: &mut Flags) {
-    flags.user.value = FlagValue::String(String::from("root"));
 
-//    println!("{:?}", flags.quiet.get_value());
+    println!("{}", flags);
+//    match flags.run_mode.value {
+//        RunMode::Execute => println!("Execute the command bro"),
+//        RunMode::DryRun => println!("It's a dry run, don't panic"),
+//    }
+//
+//    match flags.quiet.value {
+//        Boolean::True => println!("quiet == true"),
+//        Boolean::False => println!("quiet == false"),
+//    }
 
-    let is_quiet = match flags.quiet.value {
-        BoolFlag::True => println!("trupe"),
-        BoolFlag::False => println!("trupe"),
-    };
+//    assert_eq!(flags.quiet.get_value(), true);
+//    assert_eq!(flags.user.get_value(), "www-data");
 }
