@@ -1,45 +1,67 @@
-use std::collections::HashMap;
+use std::env::current_dir;
 
 #[derive(Debug)]
-pub enum FlagKind {
-    Boolean,
-    String,
-//    Array
+pub enum FlagValue<T> {
+    Boolean(T),
+    String(T),
 }
 
 #[derive(Debug)]
-pub struct Flag<'a> {
-    kind: FlagKind,
-    name: &'a str,
-    short: &'a str,
-    description: &'a str,
+pub enum BoolFlag {
+    True,
+    False,
+}
+
+#[derive(Debug)]
+pub struct Flag<T> {
+    value: FlagValue<T>,
+    name: String,
+    short: String,
+    description: String
+}
+
+impl <T> Flag<T> {
+    fn get_value(&self) -> &FlagValue<T> {
+        match &self.value {
+            FlagValue::Boolean(t) => println!("ye"),
+            FlagValue::String(t) => println!("ye"),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct Flags {
+    quiet: Flag<BoolFlag>,
+    user: Flag<String>,
 }
 
 #[test]
 fn test_flags() {
-    let mut f: HashMap<&str, Flag> = HashMap::new();
-    let items = vec![
-        Flag {
-            short: "q",
-            name: "quiet",
-            description: "Should the output be quiet",
-            kind: FlagKind::Boolean,
+    let mut flags = Flags {
+        quiet: Flag {
+            short: "q".into(),
+            name: "quiet".into(),
+            description: "Should the output be quiet".into(),
+            value: FlagValue::Boolean(BoolFlag::True),
         },
-        Flag {
-            short: "u",
-            name: "user",
-            description: "The user to run commands under",
-            kind: FlagKind::String,
+        user: Flag {
+            short: "u".into(),
+            name: "user".into(),
+            description: "The user to run commands under".into(),
+            value: FlagValue::String(String::from("www-data")),
         }
-    ];
+    };
 
-    for i in items {
-        f.insert(i.name, i);
-    }
+    look_at_flags(&mut flags);
+}
 
-    let input = "q";
+fn look_at_flags(flags: &mut Flags) {
+    flags.user.value = FlagValue::String(String::from("root"));
 
-    let _matched = f.iter().find(|&(_key, flag)| {
-        flag.short == input
-    });
+//    println!("{:?}", flags.quiet.get_value());
+
+    let is_quiet = match flags.quiet.value {
+        BoolFlag::True => println!("trupe"),
+        BoolFlag::False => println!("trupe"),
+    };
 }
