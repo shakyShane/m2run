@@ -64,7 +64,7 @@ fn sub_command(task: &IncomingCommand, run_context: &RunContext) -> Result<(), S
                 Ok(_output) => {
                     /* the command exited successfully */
                 },
-                Err(_e) => println!("The following command returned a non-zero exit code\n{}", task)
+                Err(_e) => println!("The following command returned a non-zero exit code:\n{}", task)
             }
         }
     }

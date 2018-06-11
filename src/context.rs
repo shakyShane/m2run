@@ -22,7 +22,7 @@ pub struct RunContext {
     pub mode: RunMode,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum RunMode {
     DryRun,
     Execute,
@@ -35,7 +35,7 @@ pub fn get_run_context() -> Result<RunContext, String> {
         .and_then(|_x| get_options())
         .and_then(|options: Options| {
             let cmd = env::args().nth(1);
-            is_valid_dir(&options.cwd)
+            is_valid_dir(&options.flags.cwd.value())
                 .and_then(verify_files)
                 .and_then(set_working_dir)
                 .and_then(|_| create_run_context(options, cmd))
@@ -46,19 +46,22 @@ pub fn create_run_context(options: options::Options, cmd: Option<String>) -> Res
 
     let ctx_name    = get_context_name(&options);
     let cmd         = select_cmd(cmd);
-    let mode        = select_mode(options.flags.get("run_mode"));
-    let user        = select_user(options.flags.get("user"));
     let default_env = get_default_env(&ctx_name);
+    let user        = options.flags.user.value().to_string();
+    let mode        = match *options.flags.run_mode.value() {
+        RunMode::Execute => RunMode::Execute,
+        RunMode::DryRun => RunMode::DryRun,
+    };
 
     Ok(RunContext {
         command: cmd,
-        cwd: PathBuf::from(&options.cwd),
+        cwd: PathBuf::from(&options.flags.cwd.value()),
         cwd_file_name: ctx_name.to_string(),
         env: default_env,
+        name: ctx_name.to_string(),
         options,
         mode,
-        name: ctx_name.to_string(),
-        user: user.to_string()
+        user,
     })
 }
 
@@ -70,12 +73,12 @@ fn test_create_run_context() {
     let opts = generate_options(&raw_opts, PathBuf::from(cwd)).unwrap();
     let ctx = create_run_context(opts, Some("e".into())).unwrap();
     assert_eq!(ctx.env.get("M2RUN_CONTEXT_NAME").unwrap(), "magento2-2.2-develop");
-    assert_eq!(ctx.options.flags.get("user").unwrap(), "www-data");
-    assert_eq!(ctx.options.flags.get("run_mode").unwrap(), "execute");
+//    assert_eq!(ctx.options.flags.get("user").unwrap(), "www-data");
+//    assert_eq!(ctx.options.flags.get("run_mode").unwrap(), "execute");
 }
 
 fn get_context_name(options: &options::Options) -> String {
-    let context_name = options.cwd.file_name().unwrap();
+    let context_name = options.flags.cwd.value().file_name().unwrap();
     context_name.to_string_lossy().to_string()
 }
 
@@ -88,27 +91,6 @@ fn get_default_env(name: &String) -> HashMap<String, String> {
     );
 
     env
-}
-
-fn select_mode(set_mode: Option<&String>) -> RunMode {
-    match set_mode {
-        Some(mode) => match mode.as_str() {
-            "execute" | "exe" => RunMode::Execute,
-            "dry_run" | "dryrun" | "dryRun" => RunMode::DryRun,
-            _ => RunMode::Execute,
-        },
-        None => RunMode::Execute,
-    }
-}
-
-fn select_user<'a>(set_user: Option<&String>) -> &'a str {
-    match set_user {
-        Some(user) => match user.as_str() {
-            "root" | "r" => "root",
-            _ => "www-data"
-        },
-        None => "www-data"
-    }
 }
 
 fn select_cmd(maybe_command: Option<String>) -> Option<String> {
