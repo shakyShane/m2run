@@ -5,7 +5,7 @@ use context::RunContext;
 use std::collections::HashMap;
 
 pub fn docker_build_php_command(run_context: &RunContext) -> IncomingCommand {
-    let docker_build_image_text = include_str!("../templates/contrib/with-deps.Dockerfile");
+    let docker_build_image_text = include_str!("../templates/contrib/Dockerfile");
     let docker_build_tag: String = create_build_tag(&run_context.cwd_file_name, PHP_TAG_SUFFIX);
 
     let docker_build_args = vec![
@@ -13,7 +13,7 @@ pub fn docker_build_php_command(run_context: &RunContext) -> IncomingCommand {
         "-",
         "-t",
         &docker_build_tag,
-        //        "."
+        "."
     ].iter()
         .map(|x| x.to_string())
         .collect();
