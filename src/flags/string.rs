@@ -21,6 +21,7 @@ pub fn string_from<'a>(user_input: &Vec<String>, names: &Vec<&'a str>) -> Option
         }
 }
 
+#[cfg(test)]
 mod tests {
 
     use super::*;
@@ -31,6 +32,7 @@ mod tests {
 
     #[test]
     fn test_string_from() {
+
         let user_input = test_args(vec!["--user", "shane"]);
         assert_eq!(string_from(&user_input, &vec!["user"]), Some("shane".to_string()));
 
