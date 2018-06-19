@@ -92,6 +92,22 @@ fn test_generate_options_4() {
         }
     }
 }
+#[test]
+fn test_generate_options_no_host() {
+    let opts = vec!["m2run", "c"].iter().map(|x| x.to_string()).collect();
+    let os_cwd = PathBuf::from("/users/shane");
+    let opts = generate_options(&opts, os_cwd).unwrap();
+
+    assert_eq!(opts.flags.host.value(), "contrib.m2");
+}
+#[test]
+fn test_generate_options_with_host() {
+    let opts = vec!["m2run", "c", "--host", "test.m2"].iter().map(|x| x.to_string()).collect();
+    let os_cwd = PathBuf::from("/users/shane");
+    let opts = generate_options(&opts, os_cwd).unwrap();
+
+    assert_eq!(opts.flags.host.value(), "test.m2");
+}
 
 fn split_args(raw_opts: &Vec<String>) -> (&[String], &[String], bool) {
     let len = raw_opts.len();

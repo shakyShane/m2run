@@ -6,6 +6,7 @@ use flags::quiet::get_quiet;
 use flags::cwd::get_cwd;
 use std::fmt;
 use context::RunMode;
+use flags::host::get_host;
 
 mod run_mode;
 mod user;
@@ -14,6 +15,7 @@ mod quiet;
 mod cwd;
 mod string;
 mod bool;
+mod host;
 
 #[derive(Debug, PartialEq)]
 pub struct FlagValue<T> {
@@ -54,6 +56,7 @@ pub struct ProgramFlags {
     pub quiet: FlagValue<bool>,
     pub user: FlagValue<String>,
     pub run_mode: FlagValue<RunMode>,
+    pub host: FlagValue<String>,
 }
 
 impl ProgramFlags {
@@ -71,7 +74,8 @@ pub fn create_program_flags(user_args: &Vec<String>, os_cwd: &PathBuf) -> Result
         quiet: FlagValue::new(get_quiet(&user_args)?),
         dry: FlagValue::new(get_dry(&user_args)?),
         user: FlagValue::new(get_user(&user_args)?),
-        run_mode: FlagValue::new(get_run_mode(&user_args)?)
+        run_mode: FlagValue::new(get_run_mode(&user_args)?),
+        host: FlagValue::new(get_host(&user_args)?)
     };
 
     p.post_process();

@@ -1,4 +1,4 @@
-contrib.m2:80 contrib.m2:443 {
+${CADDY_HOST}:80 ${CADDY_HOST}:443 {
     # redirect to HTTPS
     redir 301 {
         if {scheme} not https
