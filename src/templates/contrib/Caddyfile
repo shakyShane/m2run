@@ -1,4 +1,4 @@
-${CADDY_HOST}:80 ${CADDY_HOST}:443 {
+{$M2RUN_CADDY_HOST}:80 {$M2RUN_CADDY_HOST}:443 {
     # redirect to HTTPS
     redir 301 {
         if {scheme} not https

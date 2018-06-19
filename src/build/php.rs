@@ -10,6 +10,7 @@ pub fn docker_build_php_command(run_context: &RunContext) -> IncomingCommand {
 
     let docker_build_args = vec![
         "build",
+        "-f",
         "-",
         "-t",
         &docker_build_tag,
