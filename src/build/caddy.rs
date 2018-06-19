@@ -30,7 +30,7 @@ pub fn build_caddy_command(run_context: &RunContext) -> IncomingCommand {
     let mut env: HashMap<String, String> = HashMap::new();
     env.insert(
         CADDY_HOST.into(),
-        run_context.options.flags.host.value().to_owned()
+        run_context.options.flags.host.value.to_owned()
     );
 
     IncomingCommand {

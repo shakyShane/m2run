@@ -35,7 +35,7 @@ pub fn get_run_context() -> Result<RunContext, String> {
         .and_then(|_x| get_options())
         .and_then(|options: Options| {
             let cmd = env::args().nth(1);
-            is_valid_dir(&options.flags.cwd.value())
+            is_valid_dir(&options.flags.cwd.value)
                 .and_then(verify_files)
                 .and_then(set_working_dir)
                 .and_then(|_| create_run_context(options, cmd))
@@ -47,15 +47,15 @@ pub fn create_run_context(options: options::Options, cmd: Option<String>) -> Res
     let ctx_name    = get_context_name(&options);
     let cmd         = select_cmd(cmd);
     let default_env = get_default_env(&ctx_name);
-    let user        = options.flags.user.value().to_string();
-    let mode        = match *options.flags.run_mode.value() {
+    let user        = options.flags.user.value.to_string();
+    let mode        = match options.flags.run_mode.value {
         RunMode::Execute => RunMode::Execute,
         RunMode::DryRun => RunMode::DryRun,
     };
 
     Ok(RunContext {
         command: cmd,
-        cwd: PathBuf::from(&options.flags.cwd.value()),
+        cwd: PathBuf::from(&options.flags.cwd.value),
         cwd_file_name: ctx_name.to_string(),
         env: default_env,
         name: ctx_name.to_string(),
@@ -78,7 +78,7 @@ fn test_create_run_context() {
 }
 
 fn get_context_name(options: &options::Options) -> String {
-    let context_name = options.flags.cwd.value().file_name().unwrap();
+    let context_name = options.flags.cwd.value.file_name().unwrap();
     context_name.to_string_lossy().to_string()
 }
 

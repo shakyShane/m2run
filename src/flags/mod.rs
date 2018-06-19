@@ -17,27 +17,13 @@ mod string;
 mod bool;
 mod host;
 
-#[derive(Debug, PartialEq)]
-pub struct FlagValue<T> {
-    pub inner: Flag<T>
-}
-
-impl <T> FlagValue<T> {
-    pub fn new(x: Flag<T>) -> FlagValue<T> {
-        FlagValue { inner: x }
-    }
-    pub fn value(&self) -> &T {
-        &self.inner.value
-    }
-}
-
-impl <T> fmt::Display for FlagValue<T> {
+impl <T> fmt::Display for Flag<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
             "{}: {}",
-            self.inner.name,
-            self.inner.description
+            self.name,
+            self.description
         )
     }
 }
@@ -51,18 +37,18 @@ pub struct Flag<T> {
 
 #[derive(Debug, PartialEq)]
 pub struct ProgramFlags {
-    pub cwd: FlagValue<PathBuf>,
-    pub dry: FlagValue<bool>,
-    pub quiet: FlagValue<bool>,
-    pub user: FlagValue<String>,
-    pub run_mode: FlagValue<RunMode>,
-    pub host: FlagValue<String>,
+    pub cwd: Flag<PathBuf>,
+    pub dry: Flag<bool>,
+    pub quiet: Flag<bool>,
+    pub user: Flag<String>,
+    pub run_mode: Flag<RunMode>,
+    pub host: Flag<String>,
 }
 
 impl ProgramFlags {
     fn post_process(&mut self) {
-        match *self.dry.value() {
-            true => self.run_mode.inner.value = RunMode::DryRun,
+        match self.dry.value {
+            true => self.run_mode.value = RunMode::DryRun,
             _ => (),
         }
     }
@@ -70,12 +56,12 @@ impl ProgramFlags {
 
 pub fn create_program_flags(user_args: &Vec<String>, os_cwd: &PathBuf) -> Result<ProgramFlags, String> {
     let mut p = ProgramFlags {
-        cwd: FlagValue::new(get_cwd(&user_args, &os_cwd)?),
-        quiet: FlagValue::new(get_quiet(&user_args)?),
-        dry: FlagValue::new(get_dry(&user_args)?),
-        user: FlagValue::new(get_user(&user_args)?),
-        run_mode: FlagValue::new(get_run_mode(&user_args)?),
-        host: FlagValue::new(get_host(&user_args)?)
+        cwd: get_cwd(&user_args, &os_cwd)?,
+        quiet: get_quiet(&user_args)?,
+        dry: get_dry(&user_args)?,
+        user: get_user(&user_args)?,
+        run_mode: get_run_mode(&user_args)?,
+        host: get_host(&user_args)?
     };
 
     p.post_process();
@@ -89,8 +75,8 @@ fn test_post_process() {
     let os_cwd = current_dir().unwrap();
     let args = &vec!["--dry", "--cwd", "/users/shakyshane"].iter().map(|x| x.to_string()).collect();
     let flags = create_program_flags(args, &os_cwd).unwrap();
-    assert_eq!(*flags.run_mode.value(), RunMode::DryRun);
-    assert_eq!(*flags.cwd.value(), PathBuf::from("/users/shakyshane"));
+    assert_eq!(flags.run_mode.value, RunMode::DryRun);
+    assert_eq!(*flags.cwd.value, PathBuf::from("/users/shakyshane"));
 
-    println!("exist? = {}", flags.cwd.value().exists());
+    println!("exist? = {}", flags.cwd.value.exists());
 }
