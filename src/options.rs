@@ -111,16 +111,14 @@ fn test_generate_options_with_host() {
 
 fn split_args(raw_opts: &Vec<String>) -> (&[String], &[String], bool) {
     let len = raw_opts.len();
-    let indexes = 0..len;
 
-    let terminator = indexes
-        .zip(raw_opts.iter())
-        .find(|&(_i, opt)| *opt == "--");
+    let terminator = raw_opts.iter()
+        .position(|opt| opt == "--");
 
     match len {
         0...1 => (&[], &[], false),
         _ => match terminator {
-            Some((index, _opt)) => {
+            Some(index) => {
                 (&raw_opts[..index], &raw_opts[(index + 1)..], true)
             },
             None => (&[], &raw_opts[2..], false)

@@ -74,11 +74,9 @@ fn sub_command(task: &IncomingCommand, run_context: &RunContext) -> Result<(), S
 fn sub_command_multi(tasks: &Vec<IncomingCommand>, run_context: &RunContext) -> Result<(), String> {
     match run_context.mode {
         RunMode::DryRun => {
-            let indexes = 0..tasks.len();
-
-            for (index, task) in indexes.zip(tasks.iter()) {
-                println!("\nTask: {}\n{}", index + 1, task)
-            }
+            tasks.iter().enumerate().for_each(|(i, task)| {
+                println!("\nTask: {}\n{}", i + 1, task)
+            })
         }
         RunMode::Execute => {
             for task in tasks.iter() {

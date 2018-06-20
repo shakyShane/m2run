@@ -1,8 +1,5 @@
 pub fn string_from<'a>(user_input: &Vec<String>, names: &Vec<&'a str>) -> Option<String> {
-    let len = user_input.len();
-    let indexes = 0..len;
-
-    match indexes.zip(user_input)
+    match user_input.iter().enumerate()
         .find(|&(_index, x)| {
             match names.iter().find(|n| format!("--{}", n) == x.as_ref()) {
                 Some(_t) => true,
