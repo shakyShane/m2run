@@ -11,7 +11,7 @@ use run::stop::stop;
 use command::IncomingCommand;
 use run::down::down;
 use run::start::start;
-use context::RunContextError;
+use print_error::print_error;
 
 mod build;
 mod command;
@@ -20,6 +20,7 @@ mod files;
 mod options;
 mod run;
 mod flags;
+mod print_error;
 
 fn main() {
     match get_run_context() {
@@ -31,29 +32,7 @@ fn main() {
         },
         Err(err) => {
             println!("Could not create the run context, the reason was:");
-            match err {
-                RunContextError::CwdNotAvailable(path_buf) => {
-                    println!("{:?} did not exist", path_buf);
-                }
-                RunContextError::MissingFiles(missing_files, cwd) => {
-                    println!(
-                        "{} file(s) are missing in {:?}",
-                        missing_files.len(),
-                        cwd
-                    );
-                    missing_files.iter().for_each(|x| println!("---> {}", x.path));
-                }
-                RunContextError::MissingCommand => {
-                    println!("You didn't specify a command.\n");
-                    println!("Examples of valid commands:");
-                    println!("    m2run start");
-                    println!("    m2run stop");
-                    println!("    m2run exec ls");
-                }
-                RunContextError::RunContextGeneric(str) => {
-                    println!("{}", str);
-                }
-            }
+            print_error(err);
         },
     }
 }
