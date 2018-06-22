@@ -7,6 +7,7 @@ use flags::cwd::get_cwd;
 use std::fmt;
 use context::RunMode;
 use flags::host::get_host;
+use context::RunContextError;
 
 mod run_mode;
 mod user;
@@ -54,7 +55,7 @@ impl ProgramFlags {
     }
 }
 
-pub fn create_program_flags(user_args: &Vec<String>, os_cwd: &PathBuf) -> Result<ProgramFlags, String> {
+pub fn create_program_flags(user_args: &Vec<String>, os_cwd: &PathBuf) -> Result<ProgramFlags, RunContextError> {
     let mut p = ProgramFlags {
         cwd: get_cwd(&user_args, &os_cwd)?,
         quiet: get_quiet(&user_args)?,

@@ -1,8 +1,9 @@
 use flags::string::string_from;
 use flags::Flag;
 use context::RunMode;
+use context::RunContextError;
 
-pub fn get_run_mode(user_input: &Vec<String>) -> Result<Flag<RunMode>, String> {
+pub fn get_run_mode(user_input: &Vec<String>) -> Result<Flag<RunMode>, RunContextError> {
 
     let keys = &vec!["run_mode", "runmode", "run-mode", "runMode"];
     let default = "execute";

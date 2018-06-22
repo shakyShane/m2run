@@ -9,6 +9,7 @@ use std::process::Command;
 use std::process::ExitStatus;
 use std::process::Stdio;
 use std::collections::HashMap;
+use files::FileLookup;
 
 #[derive(Debug)]
 pub struct RunContext {
@@ -28,9 +29,17 @@ pub enum RunMode {
     Execute,
 }
 
+#[derive(Debug, PartialEq)]
+pub enum RunContextError {
+    CwdNotAvailable(PathBuf),
+    RunContextGeneric(String),
+    MissingFiles(Vec<FileLookup>, PathBuf),
+    MissingCommand
+}
+
 pub const M2RUN_CONTEXT_NAME: &'static str = "M2RUN_CONTEXT_NAME";
 
-pub fn get_run_context() -> Result<RunContext, String> {
+pub fn get_run_context() -> Result<RunContext, RunContextError> {
     has_docker()
         .and_then(|_x| get_options())
         .and_then(|options: Options| {
@@ -42,7 +51,7 @@ pub fn get_run_context() -> Result<RunContext, String> {
         })
 }
 
-pub fn create_run_context(options: options::Options, cmd: Option<String>) -> Result<RunContext, String> {
+pub fn create_run_context(options: options::Options, cmd: Option<String>) -> Result<RunContext, RunContextError> {
 
     let ctx_name    = get_context_name(&options);
     let cmd         = select_cmd(cmd);
@@ -70,7 +79,7 @@ fn test_create_run_context() {
     use options::{generate_options};
     let cwd = "/Users/shakyshane/Downloads/magento2-2.2-develop";
     let raw_opts = vec!["m2run"].iter().map(|x| x.to_string()).collect();
-    let opts = generate_options(&raw_opts, PathBuf::from(cwd)).unwrap();
+    let opts = generate_options(&raw_opts, &PathBuf::from(cwd)).unwrap();
     let ctx = create_run_context(opts, Some("e".into())).unwrap();
     assert_eq!(ctx.env.get("M2RUN_CONTEXT_NAME").unwrap(), "magento2-2.2-develop");
 //    assert_eq!(ctx.options.flags.get("user").unwrap(), "www-data");
@@ -100,28 +109,28 @@ fn select_cmd(maybe_command: Option<String>) -> Option<String> {
     }
 }
 
-fn set_working_dir(path_buf: &PathBuf) -> Result<(), String> {
+fn set_working_dir(path_buf: &PathBuf) -> Result<(), RunContextError> {
     match set_current_dir(&path_buf) {
         Ok(_p) => Ok(()),
-        Err(_e) => Err("Could not set the current working dir".to_string()),
+        Err(_e) => Err(RunContextError::RunContextGeneric("Could not set the current working dir".to_string())),
     }
 }
 
-fn is_valid_dir(path: &PathBuf) -> Result<&PathBuf, String> {
+fn is_valid_dir(path: &PathBuf) -> Result<&PathBuf, RunContextError> {
     if path.is_dir() {
         return Ok(path);
     }
-    return Err(format!("Directory does not exist\nInput: {:?}", path));
+    return Err(RunContextError::RunContextGeneric(format!("Directory does not exist\nInput: {:?}", path)));
 }
 
-fn has_docker() -> Result<ExitStatus, String> {
+fn has_docker() -> Result<ExitStatus, RunContextError> {
     match Command::new("docker")
         .stdout(Stdio::null())
         .arg("-v")
         .status()
     {
         Ok(t) => Ok(t),
-        Err(_e) => Err("Docker is required".to_string()),
+        Err(_e) => Err(RunContextError::RunContextGeneric("Docker is required".to_string())),
     }
 }
 

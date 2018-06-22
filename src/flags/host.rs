@@ -1,7 +1,8 @@
 use flags::Flag;
 use flags::string::string_from;
+use context::RunContextError;
 
-pub fn get_host(user_input: &Vec<String>) -> Result<Flag<String>, String> {
+pub fn get_host(user_input: &Vec<String>) -> Result<Flag<String>, RunContextError> {
     let value = string_from(&user_input, &vec!["host"])
         .unwrap_or("contrib.m2".into());
 

@@ -1,13 +1,14 @@
 use std::path::{Path, PathBuf};
+use context::RunContextError;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct FileLookup {
     pub path: String,
     pub exists: bool,
     pub absolute: PathBuf,
 }
 
-pub fn verify_files(cwd: &PathBuf) -> Result<&PathBuf, String> {
+pub fn verify_files(cwd: &PathBuf) -> Result<&PathBuf, RunContextError> {
     let required_files = vec!["composer.json", "composer.lock"];
     let file_statues = required_files_status(&required_files, &cwd);
     let (_found, missing): (Vec<&FileLookup>, Vec<&FileLookup>) =
@@ -16,13 +17,11 @@ pub fn verify_files(cwd: &PathBuf) -> Result<&PathBuf, String> {
     match missing.len() {
         0 => Ok(&cwd),
         _num => {
-            println!(
-                "Cannot continue since the following {} file(s) are missing:",
-                _num
-            );
-            missing.iter().for_each(|x| println!("---> {}", x.path));
-            println!("cwd: {:?}", cwd);
-            Err("Could not verify files".to_string())
+            let mut new_vec: Vec<FileLookup> = Vec::new();
+            for item in missing {
+                new_vec.push(item.clone());
+            }
+            Err(RunContextError::MissingFiles(new_vec, cwd.to_owned()))
         }
     }
 }
