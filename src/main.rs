@@ -12,6 +12,7 @@ use run::down::down;
 use run::start::start;
 use print_error::print_error;
 use task::Task;
+use file_operation::perform_file_operation;
 
 mod build;
 mod command;
@@ -83,7 +84,7 @@ fn process_tasks(tasks: &Vec<Task>, run_context: &RunContext) -> Result<(), Stri
                         execute_command(cmd, &run_context);
                     },
                     &Task::FileOperation(ref op) => {
-                        println!("{:?}", op);
+                        perform_file_operation(op, &run_context);
                     }
                 };
             });

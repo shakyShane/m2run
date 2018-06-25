@@ -5,6 +5,7 @@ use command::ExecCommand;
 use context::RunContext;
 use std::collections::HashMap;
 use file_operation::{FileOperation, FileOperationKind, FileWriteOp};
+use file_operation::FileRemoveOp;
 
 pub fn docker_build_php_command(run_context: &RunContext) -> ExecCommand {
     let docker_build_image_text = include_str!("../templates/contrib/Dockerfile");
@@ -32,10 +33,19 @@ pub fn docker_build_php_command(run_context: &RunContext) -> ExecCommand {
 
 pub fn docker_ignore_write(run_context: &RunContext) -> FileOperation {
     let op = FileWriteOp {
-        path: PathBuf::from(".dockerignore"),
-        content: String::from(".git\nvendor"),
+        path: run_context.cwd.join(".dockerignore"),
+        content: String::from(include_str!("../templates/contrib/.dockerignore")),
     };
     FileOperation {
         kind: FileOperationKind::Write(op)
+    }
+}
+
+pub fn docker_ignore_remove(run_context: &RunContext) -> FileOperation {
+    let op = FileRemoveOp {
+        path: run_context.cwd.join(".dockerignore")
+    };
+    FileOperation {
+        kind: FileOperationKind::Remove(op)
     }
 }
