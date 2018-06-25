@@ -22,6 +22,7 @@ mod run;
 mod flags;
 mod print_error;
 mod task;
+mod file_operation;
 
 fn main() {
     match get_run_context() {
@@ -42,60 +43,53 @@ fn try_to_execute(run_context: RunContext) -> Result<(), String> {
     match select_cmd(&run_context.command) {
         Some(SubCommands::Contrib) => {
             let tasks = start(&run_context);
-            sub_command_multi(&tasks, &run_context)
+            process_tasks(&tasks, &run_context)
         }
         Some(SubCommands::Exec) => {
-            let task = exec(&run_context);
-            sub_command(&task, &run_context)
+            let tasks = vec![exec(&run_context)];
+            process_tasks(&tasks, &run_context)
         }
         Some(SubCommands::Stop) => {
-            let task = stop(&run_context);
-            sub_command(&task, &run_context)
+            let tasks = vec![stop(&run_context)];
+            process_tasks(&tasks, &run_context)
         }
         Some(SubCommands::Down) => {
-            let task = down(&run_context);
-            sub_command(&task, &run_context)
+            let tasks = vec![down(&run_context)];
+            process_tasks(&tasks, &run_context)
         }
         None => Err("Please run one of the supported commands".to_string()),
     }
 }
 
-fn sub_command(task: &Task, run_context: &RunContext) -> Result<(), String> {
-    match run_context.mode {
-        RunMode::DryRun => {
-            println!("\nTask: {}\n{:?}", 1, task)
-        }
-        RunMode::Execute => {
-            match task {
-                &Task::ExecCommand(ref cmd) => match execute_command(cmd, &run_context) {
-                    Ok(_output) => {
-                        /* the command exited successfully */
-                    },
-                    Err(_e) => println!("The following command returned a non-zero exit code:\n{}", cmd)
-                }
-            }
-        }
-    }
-    Ok(())
-}
-
-fn sub_command_multi(tasks: &Vec<Task>, run_context: &RunContext) -> Result<(), String> {
+fn process_tasks(tasks: &Vec<Task>, run_context: &RunContext) -> Result<(), String> {
     match run_context.mode {
         RunMode::DryRun => {
             tasks.iter().enumerate().for_each(|(i, task)| {
-                println!("\nTask: {}\n{:?}", i + 1, task)
-            })
-        }
-        RunMode::Execute => {
-            for task in tasks.iter() {
                 match task {
-                    &Task::ExecCommand(ref cmd) => execute_command(cmd, &run_context)
+                    &Task::ExecCommand(ref cmd) => {
+                        println!("\nTask: {}\n{}", i + 1, cmd);
+                    },
+                    &Task::FileOperation(ref op) => {
+                        println!("\nTask: {}\n{:?}", i + 1, op);
+                    }
+                }
+            });
+            Ok(())
+        },
+        RunMode::Execute => {
+            tasks.iter().enumerate().for_each(|(i, task)| {
+                match task {
+                    &Task::ExecCommand(ref cmd) => {
+                        execute_command(cmd, &run_context);
+                    },
+                    &Task::FileOperation(ref op) => {
+                        println!("{:?}", op);
+                    }
                 };
-            }
+            });
+            Ok(())
         }
-    };
-
-    Ok(())
+    }
 }
 
 #[derive(Debug, PartialEq)]
