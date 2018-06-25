@@ -1,10 +1,10 @@
-use command::IncomingCommand;
+use command::ExecCommand;
 use build::PHP_TAG_SUFFIX;
 use context::RunContext;
 use build::create_build_tag;
 use std::collections::HashMap;
 
-pub fn exec(run_context: &RunContext) -> IncomingCommand {
+pub fn exec(run_context: &RunContext) -> ExecCommand {
     let php_container_name = create_build_tag(&run_context.cwd_file_name, PHP_TAG_SUFFIX);
     let mut base = vec!["exec", "-it", "--user", &*run_context.user, &*php_container_name];
 
@@ -19,7 +19,7 @@ pub fn exec(run_context: &RunContext) -> IncomingCommand {
 
     let env: HashMap<String, String> = HashMap::new();
 
-    IncomingCommand {
+    ExecCommand {
         command: "docker",
         args: docker_compose_build_args,
         env,

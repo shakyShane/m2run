@@ -8,7 +8,7 @@ use context::RunMode;
 use context::get_run_context;
 use run::exec::exec;
 use run::stop::stop;
-use command::IncomingCommand;
+use command::ExecCommand;
 use run::down::down;
 use run::start::start;
 use print_error::print_error;
@@ -59,7 +59,7 @@ fn try_to_execute(run_context: RunContext) -> Result<(), String> {
     }
 }
 
-fn sub_command(task: &IncomingCommand, run_context: &RunContext) -> Result<(), String> {
+fn sub_command(task: &ExecCommand, run_context: &RunContext) -> Result<(), String> {
     match run_context.mode {
         RunMode::DryRun => {
             println!("\nTask: {}\n{}", 1, task)
@@ -76,7 +76,7 @@ fn sub_command(task: &IncomingCommand, run_context: &RunContext) -> Result<(), S
     Ok(())
 }
 
-fn sub_command_multi(tasks: &Vec<IncomingCommand>, run_context: &RunContext) -> Result<(), String> {
+fn sub_command_multi(tasks: &Vec<ExecCommand>, run_context: &RunContext) -> Result<(), String> {
     match run_context.mode {
         RunMode::DryRun => {
             tasks.iter().enumerate().for_each(|(i, task)| {

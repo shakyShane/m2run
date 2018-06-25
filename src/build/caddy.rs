@@ -1,12 +1,12 @@
 use build::CADDY_TAG_SUFFIX;
 use build::{create_build_arg, create_build_tag};
-use command::IncomingCommand;
+use command::ExecCommand;
 use context::RunContext;
 use std::collections::HashMap;
 
 pub const CADDY_HOST: &'static str = "CADDY_HOST";
 
-pub fn build_caddy_command(run_context: &RunContext) -> IncomingCommand {
+pub fn build_caddy_command(run_context: &RunContext) -> ExecCommand {
     let caddy_build_image_text = include_str!("../templates/contrib/caddy.Dockerfile");
     let caddy_build_file_text = include_str!("../templates/contrib/Caddyfile");
     let caddy_build_tag: String = create_build_tag(&run_context.cwd_file_name, CADDY_TAG_SUFFIX);
@@ -33,7 +33,7 @@ pub fn build_caddy_command(run_context: &RunContext) -> IncomingCommand {
         run_context.options.flags.host.value.to_owned()
     );
 
-    IncomingCommand {
+    ExecCommand {
         command: "docker",
         args: caddy_build_args,
         stdin: caddy_build_image_text,

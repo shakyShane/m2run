@@ -1,10 +1,10 @@
 use build::PHP_TAG_SUFFIX;
 use build::create_build_tag;
-use command::IncomingCommand;
+use command::ExecCommand;
 use context::RunContext;
 use std::collections::HashMap;
 
-pub fn docker_build_php_command(run_context: &RunContext) -> IncomingCommand {
+pub fn docker_build_php_command(run_context: &RunContext) -> ExecCommand {
     let docker_build_image_text = include_str!("../templates/contrib/Dockerfile");
     let docker_build_tag: String = create_build_tag(&run_context.cwd_file_name, PHP_TAG_SUFFIX);
 
@@ -19,7 +19,7 @@ pub fn docker_build_php_command(run_context: &RunContext) -> IncomingCommand {
         .map(|x| x.to_string())
         .collect();
 
-    IncomingCommand {
+    ExecCommand {
         command: "docker",
         args: docker_build_args,
         stdin: docker_build_image_text,

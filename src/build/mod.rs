@@ -2,7 +2,7 @@ use std::io::Error;
 
 use build::caddy::build_caddy_command;
 use build::php::docker_build_php_command;
-use command::IncomingCommand;
+use command::ExecCommand;
 use context::RunContext;
 use context::RunMode;
 
@@ -13,11 +13,11 @@ const TAG_PREFIX: &'static str = "m2run";
 pub const PHP_TAG_SUFFIX: &'static str = "php";
 pub const CADDY_TAG_SUFFIX: &'static str = "caddy";
 
-pub fn build_caddy(run_context: &RunContext) -> Result<IncomingCommand, Error> {
+pub fn build_caddy(run_context: &RunContext) -> Result<ExecCommand, Error> {
     Ok(build_caddy_command(run_context))
 }
 
-pub fn build_php(run_context: &RunContext) -> Result<IncomingCommand, Error> {
+pub fn build_php(run_context: &RunContext) -> Result<ExecCommand, Error> {
     Ok(docker_build_php_command(run_context))
 }
 

@@ -6,7 +6,7 @@ use context::RunContext;
 use core::fmt;
 
 #[derive(Debug, Default)]
-pub struct IncomingCommand<'a> {
+pub struct ExecCommand<'a> {
     pub command: &'a str,
     pub args: Vec<String>,
     pub stdin: &'a str,
@@ -14,7 +14,7 @@ pub struct IncomingCommand<'a> {
     pub desc: &'a str,
 }
 
-impl<'a> fmt::Display for IncomingCommand<'a> {
+impl<'a> fmt::Display for ExecCommand<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let args = self.args
             .iter()
@@ -30,7 +30,7 @@ enum CommandType {
     NoStdin
 }
 
-pub fn execute_command(cmd: &IncomingCommand, run_context: &RunContext) -> Result<ExitStatus, Error> {
+pub fn execute_command(cmd: &ExecCommand, run_context: &RunContext) -> Result<ExitStatus, Error> {
 
     // is there any stdin data?
     let cmd_type = match cmd.stdin.len() {
