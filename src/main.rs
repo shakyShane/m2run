@@ -78,7 +78,7 @@ fn process_tasks(tasks: &Vec<Task>, run_context: &RunContext) -> Result<(), Stri
             Ok(())
         },
         RunMode::Execute => {
-            tasks.iter().enumerate().for_each(|(i, task)| {
+            tasks.iter().enumerate().for_each(|(_i, task)| {
                 match task {
                     &Task::ExecCommand(ref cmd) => {
                         execute_command(cmd, &run_context);

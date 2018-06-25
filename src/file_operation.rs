@@ -1,9 +1,7 @@
 use std::path::PathBuf;
 use std::io::{Error, Write};
 use context::RunContext;
-use context::create_run_context;
 use std::fs::File;
-use std::env::current_dir;
 use std::fs;
 
 #[derive(Debug)]
@@ -41,20 +39,27 @@ pub fn perform_file_operation(file_operation: &FileOperation, run_context: &RunC
     }
 }
 
-#[test]
-fn test_write () {
-    let op = FileWriteOp {
-        path: PathBuf::from(".dockerignore"),
-        content: String::from(".git\nvendor"),
-    };
-    let t = FileOperation {
-        kind: FileOperationKind::Write(op)
-    };
-    use options::{generate_options};
-    let raw_opts = vec!["m2run"].iter().map(|x| x.to_string()).collect();
-    let test_dir = current_dir().unwrap().join("fixtures");
-    println!("{:?}", test_dir);
-    let opts = generate_options(&raw_opts, &test_dir).unwrap();
-    let run_context = create_run_context(opts, Some("e".into())).unwrap();
-    perform_file_operation(&t, &run_context);
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use context::create_run_context;
+    use std::env::current_dir;
+
+    #[test]
+    fn test_write () {
+        let op = FileWriteOp {
+            path: PathBuf::from(".dockerignore"),
+            content: String::from(".git\nvendor"),
+        };
+        let t = FileOperation {
+            kind: FileOperationKind::Write(op)
+        };
+        use options::{generate_options};
+        let raw_opts = vec!["m2run"].iter().map(|x| x.to_string()).collect();
+        let test_dir = current_dir().unwrap().join("fixtures");
+        println!("{:?}", test_dir);
+        let opts = generate_options(&raw_opts, &test_dir).unwrap();
+        let run_context = create_run_context(opts, Some("e".into())).unwrap();
+        perform_file_operation(&t, &run_context);
+    }
 }

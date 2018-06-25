@@ -1,4 +1,3 @@
-use std::path::PathBuf;
 use build::PHP_TAG_SUFFIX;
 use build::create_build_tag;
 use command::ExecCommand;
