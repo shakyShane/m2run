@@ -2,8 +2,9 @@ use command::ExecCommand;
 use context::RunContext;
 use std::collections::HashMap;
 use run::DOCKER_COMPOSE_TEXT;
+use task::Task;
 
-pub fn down(run_context: &RunContext) -> ExecCommand {
+pub fn down(run_context: &RunContext) -> Task {
     let docker_compose_build_args = vec!["-f", "-", "down"]
         .iter()
         .map(|x| x.to_string())
@@ -16,11 +17,13 @@ pub fn down(run_context: &RunContext) -> ExecCommand {
         run_context.name.to_string(),
     );
 
-    ExecCommand {
-        command: "docker-compose",
-        args: docker_compose_build_args,
-        stdin: DOCKER_COMPOSE_TEXT,
-        env,
-        desc: "Stops the containers and removes them, along with networks and volumes",
-    }
+    Task::ExecCommand(
+        ExecCommand {
+            command: "docker-compose",
+            args: docker_compose_build_args,
+            stdin: DOCKER_COMPOSE_TEXT,
+            env,
+            desc: "Stops the containers and removes them, along with networks and volumes",
+        }
+    )
 }

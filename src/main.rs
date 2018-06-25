@@ -8,10 +8,10 @@ use context::RunMode;
 use context::get_run_context;
 use run::exec::exec;
 use run::stop::stop;
-use command::ExecCommand;
 use run::down::down;
 use run::start::start;
 use print_error::print_error;
+use task::Task;
 
 mod build;
 mod command;
@@ -21,6 +21,7 @@ mod options;
 mod run;
 mod flags;
 mod print_error;
+mod task;
 
 fn main() {
     match get_run_context() {
@@ -59,33 +60,37 @@ fn try_to_execute(run_context: RunContext) -> Result<(), String> {
     }
 }
 
-fn sub_command(task: &ExecCommand, run_context: &RunContext) -> Result<(), String> {
+fn sub_command(task: &Task, run_context: &RunContext) -> Result<(), String> {
     match run_context.mode {
         RunMode::DryRun => {
-            println!("\nTask: {}\n{}", 1, task)
+            println!("\nTask: {}\n{:?}", 1, task)
         }
         RunMode::Execute => {
-            match execute_command(task, &run_context) {
-                Ok(_output) => {
-                    /* the command exited successfully */
-                },
-                Err(_e) => println!("The following command returned a non-zero exit code:\n{}", task)
+            match task {
+                &Task::ExecCommand(ref cmd) => match execute_command(cmd, &run_context) {
+                    Ok(_output) => {
+                        /* the command exited successfully */
+                    },
+                    Err(_e) => println!("The following command returned a non-zero exit code:\n{}", cmd)
+                }
             }
         }
     }
     Ok(())
 }
 
-fn sub_command_multi(tasks: &Vec<ExecCommand>, run_context: &RunContext) -> Result<(), String> {
+fn sub_command_multi(tasks: &Vec<Task>, run_context: &RunContext) -> Result<(), String> {
     match run_context.mode {
         RunMode::DryRun => {
             tasks.iter().enumerate().for_each(|(i, task)| {
-                println!("\nTask: {}\n{}", i + 1, task)
+                println!("\nTask: {}\n{:?}", i + 1, task)
             })
         }
         RunMode::Execute => {
             for task in tasks.iter() {
-                execute_command(task, &run_context);
+                match task {
+                    &Task::ExecCommand(ref cmd) => execute_command(cmd, &run_context)
+                };
             }
         }
     };
