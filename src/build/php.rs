@@ -31,19 +31,17 @@ pub fn docker_build_php_command(run_context: &RunContext) -> ExecCommand {
 }
 
 pub fn docker_ignore_write(run_context: &RunContext) -> FileOperation {
-    let op = FileWriteOp {
-        path: run_context.cwd.join(".dockerignore"),
-        content: String::from(include_str!("../templates/contrib/.dockerignore")),
-    };
+    let op = FileWriteOp::new(
+        run_context.cwd.join(".dockerignore"),
+        String::from(include_str!("../templates/contrib/.dockerignore"))
+    );
     FileOperation {
         kind: FileOperationKind::Write(op)
     }
 }
 
 pub fn docker_ignore_remove(run_context: &RunContext) -> FileOperation {
-    let op = FileRemoveOp {
-        path: run_context.cwd.join(".dockerignore")
-    };
+    let op = FileRemoveOp::new(run_context.cwd.join(".dockerignore"));
     FileOperation {
         kind: FileOperationKind::Remove(op)
     }

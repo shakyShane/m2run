@@ -71,7 +71,7 @@ fn process_tasks(tasks: &Vec<Task>, run_context: &RunContext) -> Result<(), Stri
                         println!("\nTask: {}\n{}", i + 1, cmd);
                     },
                     &Task::FileOperation(ref op) => {
-                        println!("\nTask: {}\n{:?}", i + 1, op);
+                        println!("\nTask: {}\n{}", i + 1, op);
                     }
                 }
             });
