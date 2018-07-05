@@ -36,6 +36,16 @@ pub struct Flag<T> {
     pub description: String,
 }
 
+impl <T> Flag<T> {
+    pub fn new(value: T, name: impl Into<String>, description: impl Into<String>) -> Flag<T> {
+        Flag {
+            value,
+            name: name.into(),
+            description: description.into(),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub struct ProgramFlags {
     pub cwd: Flag<PathBuf>,

@@ -3,9 +3,9 @@ use flags::Flag;
 use context::RunContextError;
 
 pub fn get_dry(user_input: &Vec<String>) -> Result<Flag<bool>, RunContextError> {
-    Ok(Flag {
-        value: bool_from(&user_input, &vec!["dry"]).unwrap_or(false),
-        name: "dry".into(),
-        description: "Shortcut for setting the run mode".into()
-    })
+    Ok(Flag::new(
+        bool_from(&user_input, &vec!["dry"]).unwrap_or(false),
+        "dry",
+        "Shortcut for setting the run mode"
+    ))
 }
