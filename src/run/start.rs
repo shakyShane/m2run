@@ -12,9 +12,14 @@ pub fn start(run_context: &RunContext) -> Vec<Task> {
 
     let tasks = vec![
         Task::FileOperation(docker_ignore_write(&run_context)),
+        // TODO: Add the .docker/composer-cache dir if it doesn't exist
+        // TODO: add the .docker/composer-cache dir if it exists
+        // TODO: add the patches dir if it exists
+        // TODO: add mysql command for importing a DB
+        //       - docker exec -i mysql-container mysql -udocker -pdocker docker < data.sql
         Task::ExecCommand(build_docker),
         Task::FileOperation(docker_ignore_remove(&run_context)),
-        Task::ExecCommand(build_caddy),
+//        Task::ExecCommand(build_caddy),
         Task::ExecCommand(run_compose)
     ];
 

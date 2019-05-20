@@ -3,6 +3,3 @@
 .git
 node_modules
 vendor
-
-app/etc/env.php
-app/etc/config.php

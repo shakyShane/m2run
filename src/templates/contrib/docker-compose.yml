@@ -4,15 +4,6 @@ volumes:
 
 services:
 
-  caddy:
-    container_name: "m2run__${M2RUN_CONTEXT_NAME}__caddy"
-    image: "m2run__${M2RUN_CONTEXT_NAME}__caddy:latest"
-    links:
-      - entry
-    ports:
-      - '80:80'
-      - '443:443'
-
   entry:
     container_name: "m2run__${M2RUN_CONTEXT_NAME}__nginx"
     image: bluestreak/entry:3
@@ -20,15 +11,17 @@ services:
       - php
     depends_on:
       - php
+    ports:
+      - '80:80'
 
   php:
     container_name: "m2run__${M2RUN_CONTEXT_NAME}__php"
     image: "m2run__${M2RUN_CONTEXT_NAME}__php:latest"
-#    volumes:
+    volumes:
 #      - ./composer.lock:/var/www/composer.lock
 #      - ./composer.json:/var/www/composer.json
-#      - ./app/code:/var/www/app/code
-#      - ./app/design:/var/www/app/design
+      - ./app/code:/var/www/app/code
+      - ./app/design:/var/www/app/design
 #      - ./app/code/Magento/Theme:/var/www/app/code/Magento/Theme
     ports:
       - '9000'
@@ -41,12 +34,12 @@ services:
       - MYSQL_ROOT_PASSWORD=docker
       - MYSQL_USER=docker
 
-      - MAGE_HOST=https://contrib.m2
+      - MAGE_HOST=http://contrib.m2
       - MAGE_ADMIN_USER=admin
       - MAGE_ADMIN_PASS=password123
 
       - PHP_MEMORY_LIMIT=3G
-      - VIRTUAL_HOST=https://contrib.m2
+      - VIRTUAL_HOST=http://contrib.m2
   db:
     container_name: "m2run__${M2RUN_CONTEXT_NAME}__mysql"
     image: 'mysql:5.6'
@@ -61,7 +54,7 @@ services:
       - '3306:3306'
 
   redis:
-    container_name: "m2rum__${M2RUN_CONTEXT_NAME}__redis"
+    container_name: "m2run__${M2RUN_CONTEXT_NAME}__redis"
     image: 'redis:3-alpine'
     ports:
       - '6379'

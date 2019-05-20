@@ -1,29 +1,26 @@
-FROM wearejh/m2-php-70:travis-14
+FROM wearejh/php:7.1
 
-# Magento
-COPY composer.json composer.lock ./
-#COPY .docker/composer-cache .docker/composer-cache
+WORKDIR /var/www
+
+COPY composer.json composer.lock auth.json ./
+COPY .docker/composer-cache .docker/composer-cache
+RUN mkdir -p app/etc vendor var generation lib pub
+COPY app app
+COPY patches patches
 
 RUN chsh -s /bin/bash www-data \
     && chown -R www-data:www-data ./
 
-RUN su - www-data -c "COMPOSER_CACHE_DIR=.docker/composer-cache composer install --no-interaction --prefer-dist -o"
+#RUN su - www-data -c "COMPOSER_CACHE_DIR=.docker/composer-cache composer install --no-interaction --prefer-dist -o"
 
-# Frontend
-COPY app app
-COPY bin bin
-COPY dev dev
-COPY generated generated
-COPY lib lib
-COPY pub pub
-COPY setup setup
-COPY var var
+RUN chown -R www-data:www-data var generation pub
+#RUN chmod +x bin/magento
 
-RUN find . -user root | xargs chown www-data:www-data
+#RUN su - www-data -c "COMPOSER_CACHE_DIR=.docker/composer-cache composer dumpautoload --no-interaction -o"
 
-VOLUME ["/var/www/app/etc"]
+ENV COMPOSER_CACHE_DIR=.docker/composer-cache
+
 VOLUME ["/var/www/pub"]
-VOLUME ["/var/www/setup"]
 VOLUME ["/var/www/var"]
 VOLUME ["/var/www/vendor"]
 VOLUME ["/var/www/lib"]
